@@ -72,11 +72,6 @@ keycloak:
             "offline_access",
             "uma_authorization"
           ],
-          "groups": [
-            { "name": "admins" },
-            { "name": "operators" },
-            { "name": "developers" }
-          ],
           "identityProviders": [
             {
               "alias": "github",
@@ -106,16 +101,13 @@ keycloak:
                 "prompt": "none"
               }
             }
-          ],
-          
+          ],          
           "users": [
             {
-              "username": "john.itvn@gmail.com",
-              "email": "john.itvn@gmail.com",
-              "enabled": true,
-              "emailVerified": true,
+              "username": "admin",            
+              "enabled": true,              
               "realmRoles": [ "admin" ],
-              "groups": [ "admins" ]              
+              "clientRoles": { "argo-cd": [ "admin" ] }
             }
           ],
           "clients": [
@@ -136,7 +128,12 @@ keycloak:
                 "view": true,
                 "configure": false,
                 "manage": true
-              }
+              },
+              "roles": [
+                { "name": "admin" },
+                { "name": "operator" },
+                { "name": "developer" }
+              ]
             }
           ]
         }         
