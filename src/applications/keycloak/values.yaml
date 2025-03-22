@@ -72,6 +72,16 @@ keycloak:
             "offline_access",
             "uma_authorization"
           ],
+          "roles": {
+            "clients": {
+              "argocd-cd": [
+                {
+                  name: "admin",
+                  clientRole: true
+                }
+              ]
+            }
+          },
           "identityProviders": [
             {
               "alias": "github",
@@ -128,12 +138,7 @@ keycloak:
                 "view": true,
                 "configure": false,
                 "manage": true
-              },
-              "roles": [
-                { "name": "admin" },
-                { "name": "operator" },
-                { "name": "developer" }
-              ]
+              }              
             }
           ]
         }         
