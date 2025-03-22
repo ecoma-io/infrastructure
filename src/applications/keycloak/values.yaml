@@ -73,11 +73,11 @@ keycloak:
             "uma_authorization"
           ],
           "roles": {
-            "clients": {
+            "client": {
               "argocd-cd": [
                 {
-                  name: "admin",
-                  clientRole: true
+                  "name": "admin",
+                  "clientRole": true,
                 }
               ]
             }
