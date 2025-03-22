@@ -74,7 +74,7 @@ keycloak:
           ],
           "roles": {
             "client": {
-              "argocd-cd": [
+              "argo-cd": [
                 {
                   "name": "admin",
                   "clientRole": true,
