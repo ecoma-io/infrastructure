@@ -137,7 +137,7 @@ keycloak:
           "users": [
             {
               "username": "john.itvn@gmail.com", 
-              "email": "john.itvn@gmail.com"           
+              "email": "john.itvn@gmail.com",           
               "enabled": true,              
               "realmRoles": [ "admin" ],
               "clientRoles": { 
