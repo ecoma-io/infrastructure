@@ -41,7 +41,11 @@ configs:
       clientID: argo-cd
       clientSecret: test-secret  
       redirectURI: https://argocd.ecoma.io/auth/callback
-      requestedScopes: openid profile email roles
+      requestedScopes: 
+        - openid 
+        - profile
+        - email 
+        - roles
    
   params:
     server.insecure: true
