@@ -131,15 +131,34 @@ keycloak:
           "clients": [
             {
               "clientId": "argo-cd",
-              "name": "ArgoCD Client",
+              "name": "ArgoCD",
               "enabled": true,
               "clientAuthenticatorType": "client-secret",
               "secret": "$(env:ARGOCD_CLIENT_SECRET)",
               "redirectUris": [
-                "https://argocd.ecoma.io/auth/callback"
+                "https://argocd.ecoma.io/*"
               ],
               "webOrigins": [
                 "https:///argocd.ecoma.io"
+              ],
+              "protocol": "openid-connect",
+              "access": {
+                "view": true,
+                "configure": false,
+                "manage": true
+              }              
+            },
+            {
+              "clientId": "headlamp",
+              "name": "Headpamp",
+              "enabled": true,
+              "clientAuthenticatorType": "client-secret",
+              "secret": "$(env:ARGOCD_CLIENT_SECRET)",
+              "redirectUris": [
+                "https://headlamp.ecoma.io/*"
+              ],
+              "webOrigins": [
+                "https:///headlamp.ecoma.io"
               ],
               "protocol": "openid-connect",
               "access": {
