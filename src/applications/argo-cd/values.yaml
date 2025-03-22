@@ -46,6 +46,8 @@ configs:
         - profile
         - email 
         - roles
+      claimMapping:
+        groups: roles
    
   params:
     server.insecure: true
