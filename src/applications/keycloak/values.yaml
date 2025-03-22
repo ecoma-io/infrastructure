@@ -78,6 +78,14 @@ keycloak:
                 {
                   "name": "admin",
                   "clientRole": true,
+                  "description": "System admins",
+                  "composite": false,
+                },
+                {
+                  "name": "developers",
+                  "clientRole": true,
+                  "description": "Developers",
+                  "composite": false,
                 }
               ]
             }
