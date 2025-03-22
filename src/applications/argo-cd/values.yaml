@@ -45,7 +45,7 @@ configs:
         - openid 
         - profile
         - email 
-        - roles
+        - resource_access
       claimMapping:
         roles: groups
    
