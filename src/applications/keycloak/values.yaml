@@ -87,6 +87,20 @@ keycloak:
                   "description": "Developers",
                   "composite": false,
                 }
+              ],
+              "headlamp": [
+                {
+                  "name": "admin",
+                  "clientRole": true,
+                  "description": "System admins",
+                  "composite": false,
+                },
+                {
+                  "name": "developers",
+                  "clientRole": true,
+                  "description": "Developers",
+                  "composite": false,
+                }
               ]
             }
           },
@@ -122,10 +136,14 @@ keycloak:
           ],          
           "users": [
             {
-              "username": "admin",            
+              "username": "john.itvn@gmail.com", 
+              "email": "john.itvn@gmail.com"           
               "enabled": true,              
               "realmRoles": [ "admin" ],
-              "clientRoles": { "argo-cd": [ "admin" ] }
+              "clientRoles": { 
+                "argo-cd": [ "admin" ],
+                "headlamp": [ "admin" ]
+              }
             }
           ],
           "clients": [
