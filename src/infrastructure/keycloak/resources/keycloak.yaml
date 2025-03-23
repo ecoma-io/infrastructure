@@ -59,6 +59,7 @@ spec:
         standardFlowEnabled: true
         serviceAccountsEnabled: true        
         publicClient: false
+        fullScopeAllowed: true
         secret: "${ARGOCD_CLIENT_SECRET}"
         redirectUris:
           - "https://argocd.ecoma.io/*" 
