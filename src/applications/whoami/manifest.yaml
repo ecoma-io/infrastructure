@@ -63,8 +63,6 @@ spec:
                 name: whoami
                 port:
                   number: 80
-      middlewares:
-        - name: cloudflare-real-ip 
   tls:
     - hosts:
         - whoami.ecoma.io 
