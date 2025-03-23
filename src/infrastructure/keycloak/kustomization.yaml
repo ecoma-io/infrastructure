@@ -12,4 +12,5 @@ helmCharts:
     version: 16.5.5
     releaseName: postgresql
     namespace: keycloak
-    valuesFile: postgresql.yaml
+    additionalValuesFiles:  
+      - postgresql.yaml
