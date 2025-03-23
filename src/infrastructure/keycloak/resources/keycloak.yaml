@@ -14,44 +14,7 @@ spec:
       key: database-username
     passwordSecret:
       name: keycloak-secret
-      key: database-password
-  http:
-    tlsEnabled: true
-  hostname:
-    hostname: accounts.ecoma.io
-  # resources:
-  #   requests:
-  #     cpu: "500m"
-  #     memory: "256Mi"
-  #   limits:
-  #     cpu: "750m"
-  #     memory: "384Mi"
-  ingress:
-    enabled: true
-    className: "traefik"
-    annotations:
-      cert-manager.io/cluster-issuer: "cluster-issuer"    
-    rules:
-      - host: accounts.ecoma.io
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: keycloak
-                port:
-                  number: 80
-    tls:
-      - hosts:
-          - accounts.ecoma.io
-        secretName: keycloak-tls  
-  podDisruptionBudget:
-    enabled: true
-    minAvailable: 1
-  additionalOptions:
-    - name: KC_PROXY
-      value: "edge" 
-    - name: KC_HOSTNAME
-      value: "accounts.ecoma.io"
-    - name: KC_HTTP_ENABLED
-      value: "true"
+      key: database-password    
+    poolInitialSize: 1
+    poolMinSize: 1
+    poolMaxSize: 3
