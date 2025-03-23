@@ -79,3 +79,8 @@ spec:
         emailVerified: true
         realmRoles:
           - realm-admin
+    # placeholders:
+    #   ENV_KEY:
+    #     secret:
+    #       name: SECRET_NAME
+    #       key: SECRET_KEY
