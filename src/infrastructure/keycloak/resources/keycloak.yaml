@@ -22,7 +22,7 @@ spec:
     httpEnabled: true
   hostname:
     strict: false
-    hostname: accounts.ecoma.io
+    hostname: https://accounts.ecoma.io
   additionalOptions:
     - name: proxy-protocol-enabled
       value: "true"   
