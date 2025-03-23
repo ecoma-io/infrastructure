@@ -26,8 +26,6 @@ spec:
   ingress:
     enabled: false
   additionalOptions:
-    - name: proxy-protocol-enabled
-      value: "true"   
     - name: proxy-headers
       value: xforwarded
     - name: hostname-debug
