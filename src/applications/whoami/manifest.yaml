@@ -39,7 +39,6 @@ metadata:
   namespace: testing
   annotations:
     kubernetes.io/ingress.class: traefik
-    traefik.ingress.kubernetes.io/router.middlewares: cloudflare-real-ip@kubernetescrd
     cert-manager.io/cluster-issuer: cluster-issuer
 spec:
   rules:
