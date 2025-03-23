@@ -45,6 +45,10 @@ spec:
     realm: master
     displayName: Ecoma
     enabled: true
+    registrationAllowed: true
+    registrationEmailAsUsername: true
+    loginWithEmailAllowed: true
+    rememberMe: true
     clients:
       - clientId: argocd
         name: ArgoCD
@@ -53,7 +57,7 @@ spec:
         clientAuthenticatorType: client-secret
         directAccessGrantsEnabled: true
         standardFlowEnabled: true
-        serviceAccountsEnabled: true
+        serviceAccountsEnabled: true        
         publicClient: false
         redirectUris:
           - "https://argocd.ecoma.io/*" 
