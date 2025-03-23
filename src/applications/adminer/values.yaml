@@ -42,7 +42,8 @@ service:
 ingress:
   enabled: true
   className: traefik
-  annotations: {}
+  annotations: 
+    cert-manager.io/cluster-issuer: cluster-issuer
   hosts:
     - host: adminer.ecoma.io
       paths:
