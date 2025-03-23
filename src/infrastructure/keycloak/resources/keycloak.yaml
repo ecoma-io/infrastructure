@@ -25,6 +25,8 @@ spec:
     hostname: accounts.ecoma.io
   ingress:
     enabled: false
+  transaction:
+    xaEnabled: false
   additionalOptions:
     - name: proxy-headers
       value: xforwarded
