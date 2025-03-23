@@ -20,6 +20,5 @@ spec:
     poolMaxSize: 3
   http:
     httpEnabled: true
-    httpPort: 8180
-    httpsPort: 8543
-    tlsSecret: keycloak-tls
+  hostname:
+    strict: false
