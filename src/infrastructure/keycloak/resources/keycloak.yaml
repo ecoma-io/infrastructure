@@ -41,9 +41,9 @@ metadata:
 spec:
   keycloakCRName: keycloak
   realm:
-    id: argocd
-    realm: argocd
-    displayName: ArgoCd
+    id: master
+    realm: master
+    displayName: Ecoma
     enabled: true
     clients:
       - clientId: argocd
