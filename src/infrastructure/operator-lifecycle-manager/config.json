@@ -1,5 +1,5 @@
 {
   "name": "operator-lifecycle-manager",
-  "namespace": "operators",
+  "namespace": "olm",
   "syncWave": "-2"
 }
