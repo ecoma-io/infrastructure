@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
   - manifests/namespace.yaml
+  - manifests/keycloak.yaml
 
 helmCharts:
   - name: argo-cd
