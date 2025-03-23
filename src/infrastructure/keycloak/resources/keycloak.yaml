@@ -23,7 +23,7 @@ spec:
   hostname:
     strict: false
     hostname: https://accounts.ecoma.io
-    admin: https:/keycloak.ecoma.io
+    admin: https://keycloak.ecoma.io
   ingress:
     enabled: true
     className: traefik
@@ -35,3 +35,5 @@ spec:
       value: "true"   
     - name: proxy-headers
       value: xforwarded
+    - name: hostname-debug
+      value: "true"
