@@ -90,14 +90,14 @@ spec:
       - alias: github
         providerId: github
         enabled: true
-        trustEmail: "true"
+        trustEmail: true
         config:
           clientId: Ov23li943a6yVEZruicm
           clientSecret: "${GITHUB_CLIENT_SECRET}"
       - alias: google
         providerId: google
         enabled: true
-        trustEmail: "true"
+        trustEmail: true
         config:
           clientId: 49648312556-mpvuf5030bpt6qlqevv1lit8c3uu5b2l.apps.googleusercontent.com
           clientSecret: "${GOOGLE_CLIENT_SECRET}"
