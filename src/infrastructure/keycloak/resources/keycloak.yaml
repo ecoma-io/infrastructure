@@ -19,13 +19,13 @@ spec:
     tlsEnabled: true
   hostname:
     hostname: accounts.ecoma.io
-  resources:
-    requests:
-      cpu: "500m"
-      memory: "256Mi"
-    limits:
-      cpu: "750m"
-      memory: "384Mi"
+  # resources:
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "256Mi"
+  #   limits:
+  #     cpu: "750m"
+  #     memory: "384Mi"
   ingress:
     enabled: true
     className: "traefik"
