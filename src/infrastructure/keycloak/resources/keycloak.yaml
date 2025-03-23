@@ -23,6 +23,7 @@ spec:
     tlsSecret: keycloak-tls
   hostname:
     strict: false
+    hostname: accounts.ecoma.io
   additionalOptions:
     - name: proxy-protocol-enabled
       value: "true"   
