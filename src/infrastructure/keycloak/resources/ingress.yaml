@@ -4,14 +4,14 @@ metadata:
   name: keycloak
   namespace: keycloak
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-clusterissuer"
+    cert-manager.io/cluster-issuer: "cluster-issuer"
 spec:
   tls:
     - hosts:
-        - keycloak.example.com
+        - accounts.ecoma.io
       secretName: keycloak-tls
   rules:
-    - host: keycloak.example.com
+    - host: accounts.ecoma.io
       http:
         paths:
           - path: /
