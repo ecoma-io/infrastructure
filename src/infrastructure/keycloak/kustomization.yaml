@@ -6,4 +6,3 @@ resources:
   - https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/26.1.4/kubernetes/kubernetes.yml
   - resources/secret.yaml
   - resources/keycloak.yaml
-  - resources/ingress.yaml
