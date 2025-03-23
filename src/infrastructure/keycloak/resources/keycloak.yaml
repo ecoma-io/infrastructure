@@ -41,8 +41,8 @@ metadata:
 spec:
   keycloakCRName: keycloak
   realm:
-    id: master
-    realm: master
+    id: ecoma
+    realm: ecoma
     displayName: Ecoma
     enabled: true
     registrationAllowed: true
