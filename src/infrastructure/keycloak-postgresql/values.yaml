@@ -13,6 +13,7 @@ postgresql:
     nodeSelector: 
       kubernetes.io/hostname: node1
     persistence:
+      enabled: false
       size: 1Gi
       storageClass: local-path
     resources:
