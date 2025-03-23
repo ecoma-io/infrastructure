@@ -10,10 +10,10 @@ spec:
     host: postgresql-hl.keycloak.svc.cluster.local
     database: keycloak
     usernameSecret:
-      name: keycloak-secret
+      name: keycloak-database-secret
       key: database-username
     passwordSecret:
-      name: keycloak-secret
+      name: keycloak-database-secret
       key: database-password    
     poolInitialSize: 1
     poolMinSize: 1
@@ -59,6 +59,7 @@ spec:
         standardFlowEnabled: true
         serviceAccountsEnabled: true        
         publicClient: false
+        secret: "${ARGOCD_CLIENT_SECRET}"
         redirectUris:
           - "https://argocd.ecoma.io/*" 
         webOrigins:
@@ -79,8 +80,31 @@ spec:
         emailVerified: true
         realmRoles:
           - realm-admin
-    # placeholders:
-    #   ENV_KEY:
-    #     secret:
-    #       name: SECRET_NAME
-    #       key: SECRET_KEY
+    identityProviders:
+      - alias: github
+        providerId: github
+        enabled: true
+        config:
+          clientId: Ov23li943a6yVEZruicm
+          clientSecret: "${GITHUB_CLIENT_SECRET}"
+          defaultScope: "read:user user:email"      
+      - alias: google
+        providerId: google
+        enabled: true
+        config:
+          clientId: 49648312556-mpvuf5030bpt6qlqevv1lit8c3uu5b2l.apps.googleusercontent.com
+          clientSecret: "${GOOGLE_CLIENT_SECRET}"
+          defaultScope: "read:user user:email"
+    placeholders:
+      ARGOCD_CLIENT_SECRET:
+        secret:
+          name: keycloak-clientid-secret
+          key: argocd
+      GITHUB_CLIENT_SECRET:
+        secret:
+          name: keycloak-clientid-secret
+          key: github
+      GOOGLE_CLIENT_SECRET:
+        secret:
+          name: keycloak-clientid-secret
+          key: google
