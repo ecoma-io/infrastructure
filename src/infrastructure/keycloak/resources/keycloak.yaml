@@ -22,6 +22,7 @@ spec:
     httpEnabled: true
   hostname:
     strict: false
+    hostname: accounts.ecoma.io
   ingress:
     enabled: false
   additionalOptions:
