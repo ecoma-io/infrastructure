@@ -71,40 +71,46 @@ spec:
           - profile
           - email
           - roles
+        roles:
+          - name: admin
+            description: "Administrator role for ArgoCD"
     users:
-      - username: admin
+      - username: john.itvn@gmail.com
         enabled: true
         firstName: Argo
         lastName: Admin
-        email: admin@example.com
+        email: john.itvn@gmail.com
         emailVerified: true
         realmRoles:
           - realm-admin
+        clientRoles:
+          argocd:
+            - admin
     identityProviders:
       - alias: github
         providerId: github
         enabled: true
+        trustEmail: "true"
         config:
           clientId: Ov23li943a6yVEZruicm
           clientSecret: "${GITHUB_CLIENT_SECRET}"
-          defaultScope: "read:user user:email"      
       - alias: google
         providerId: google
         enabled: true
+        trustEmail: "true"
         config:
           clientId: 49648312556-mpvuf5030bpt6qlqevv1lit8c3uu5b2l.apps.googleusercontent.com
           clientSecret: "${GOOGLE_CLIENT_SECRET}"
-          defaultScope: "read:user user:email"
-    placeholders:
-      ARGOCD_CLIENT_SECRET:
-        secret:
-          name: keycloak-clientid-secret
-          key: argocd
-      GITHUB_CLIENT_SECRET:
-        secret:
-          name: keycloak-clientid-secret
-          key: github
-      GOOGLE_CLIENT_SECRET:
-        secret:
-          name: keycloak-clientid-secret
-          key: google
+  placeholders:
+    ARGOCD_CLIENT_SECRET:
+      secret:
+        name: keycloak-clientid-secret
+        key: argocd
+    GITHUB_CLIENT_SECRET:
+      secret:
+        name: keycloak-clientid-secret
+        key: github
+    GOOGLE_CLIENT_SECRET:
+      secret:
+        name: keycloak-clientid-secret
+        key: google
