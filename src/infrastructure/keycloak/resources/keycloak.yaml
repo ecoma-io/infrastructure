@@ -23,7 +23,6 @@ spec:
   hostname:
     strict: false
     hostname: https://accounts.ecoma.io
-    admin: https://keycloak.ecoma.io
   ingress:
     enabled: true
     className: traefik
