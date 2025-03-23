@@ -5,9 +5,9 @@ postgresql:
     username: keycloak  
     database: keycloak
     existingSecret: keycloak-postgresql-secret
-    secretKeys:
-      adminPasswordKey: admin-password
+    secretKeys:      
       userPasswordKey: password
+      adminPasswordKey: admin-password
       replicationPasswordKey: replication-password
   primary:    
     nodeSelector: 
