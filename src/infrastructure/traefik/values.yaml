@@ -46,3 +46,7 @@ traefik:
         target:
           type: Utilization
           averageUtilization: 80
+  providers:
+    kubernetesIngress:
+      middleware:
+        default: cloudflare-real-ip@kubernetescrd
