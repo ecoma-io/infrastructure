@@ -95,6 +95,32 @@ spec:
         config:
           clientId: Ov23li943a6yVEZruicm
           clientSecret: "${GITHUB_CLIENT_SECRET}"
+        syncMode: "INHERIT"
+        mappers:
+          - name: github-email-mapper
+            identityProviderMapper: oidc-user-attribute-idp-mapper
+            config:
+              claim: email
+              user.attribute: email
+              syncMode: "FORCE" 
+          - name: github-fullname-mapper
+            identityProviderMapper: oidc-user-attribute-idp-mapper
+            config:
+              claim: name
+              user.attribute: fullName
+              syncMode: "INHERIT"
+          - name: github-avatar-mapper
+            identityProviderMapper: oidc-user-attribute-idp-mapper
+            config:
+              claim: picture
+              user.attribute: avatar
+              syncMode: "INHERIT"
+          - name: github-id-mapper
+            identityProviderMapper: oidc-user-attribute-idp-mapper
+            config:
+              claim: sub
+              user.attribute: external-github-id
+              syncMode: "FORCE"
       - alias: google
         providerId: google
         enabled: true
@@ -102,6 +128,32 @@ spec:
         config:
           clientId: 49648312556-mpvuf5030bpt6qlqevv1lit8c3uu5b2l.apps.googleusercontent.com
           clientSecret: "${GOOGLE_CLIENT_SECRET}"
+        syncMode: "INHERIT"
+        mappers:
+          - name: google-email-mapper
+            identityProviderMapper: oidc-user-attribute-idp-mapper
+            config:
+              claim: email
+              user.attribute: email
+              syncMode: "FORCE"
+          - name: google-fullname-mapper
+            identityProviderMapper: oidc-user-attribute-idp-mapper
+            config:
+              claim: name
+              user.attribute: fullName
+              syncMode: "INHERIT"
+          - name: google-avatar-mapper
+            identityProviderMapper: oidc-user-attribute-idp-mapper
+            config:
+              claim: picture
+              user.attribute: avatar
+              syncMode: "INHERIT"
+          - name: google-id-mapper
+            identityProviderMapper: oidc-user-attribute-idp-mapper
+            config:
+              claim: sub
+              user.attribute: external-google-id
+              syncMode: "FORCE"
   placeholders:
     ARGOCD_CLIENT_SECRET:
       secret:
