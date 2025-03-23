@@ -99,7 +99,7 @@ kubectl apply -f "$ROOT_DIR/src/infrastructure/cloudflare-tunnel/manifests/"
 
 
 echo "🚀 Installing ArgoCD..."
-kubectl kustomize --enable-helm "$ROOT_DIR/src/applications/argo-cd" | kubectl apply -f -
+kubectl kustomize --enable-helm "$ROOT_DIR/src/infrastructure/argo-cd" | kubectl apply -f -
 
 echo "⏳ Waiting for ArgoCD pods to be ready..."
 kubectl wait --for=condition=Ready pod -l app.kubernetes.io/component=server -n argocd --timeout=300s
