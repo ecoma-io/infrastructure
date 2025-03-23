@@ -19,11 +19,9 @@ spec:
     poolMinSize: 1
     poolMaxSize: 3
   http:
-    httpEnabled: false
-    tlsSecret: keycloak-tls
+    httpEnabled: true
   hostname:
     strict: false
-    hostname: accounts.ecoma.io
   additionalOptions:
     - name: proxy-protocol-enabled
       value: "true"   
