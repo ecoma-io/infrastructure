@@ -24,6 +24,12 @@ spec:
     strict: false
     hostname: https://accounts.ecoma.io
     admin: https://accounts.ecoma.io/admin
+  ingress:
+    enabled: true
+    className: traefik
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      cert-manager.io/cluster-issuer: cluster-issuer
   additionalOptions:
     - name: proxy-protocol-enabled
       value: "true"   
