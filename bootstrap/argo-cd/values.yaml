@@ -37,17 +37,13 @@ configs:
     timeout.reconciliation: 15s
     oidc.config: |
       name: Keycloak
-      issuer: https://accounts.ecoma.io/realms/master
-      clientID: argo-cd
-      clientSecret: test-secret  
+      issuer: https://accounts.ecoma.io/realms/argocd
+      clientID: argocd
       redirectURI: https://argocd.ecoma.io/auth/callback
       requestedScopes: 
         - openid 
         - profile
-        - email 
-        - resource_access
-      claimMapping:
-        roles: groups
+        - email
    
   params:
     server.insecure: true
