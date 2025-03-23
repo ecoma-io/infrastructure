@@ -88,7 +88,7 @@ kubectl apply -f "$ROOT_DIR/src/infrastructure/cluster-issuer/cluster-issuer.yam
 
 echo "🚀 Installing Traefik..."
 helm dependency update --skip-refresh --debug  "$ROOT_DIR/src/infrastructure/traefik"
-helm upgrade  traefik "$ROOT_DIR/src/infrastructure/traefik" \
+helm upgrade traefik "$ROOT_DIR/src/infrastructure/traefik" \
     --debug \
     --install \
     --wait \
@@ -99,13 +99,14 @@ kubectl apply -f "$ROOT_DIR/src/infrastructure/cloudflare-tunnel/manifests/"
 
 
 echo "🚀 Installing ArgoCD..."
-kubectl kustomize --enable-helm "$ROOT_DIR/src/infrastructure/argo-cd" | kubectl apply -f -
+kubectl kustomize --enable-helm "$ROOT_DIR/bootstrap/argo-cd" | kubectl apply -f -
 
 echo "⏳ Waiting for ArgoCD pods to be ready..."
 kubectl wait --for=condition=Ready pod -l app.kubernetes.io/component=server -n argocd --timeout=300s
 echo "🚀 ArgoCD is ready!"
 
 echo "🚀 Creating ArgoCD resources..."
+kubectl apply -f "$ROOT_DIR/bootstrap/argo-cd.yaml"
 kubectl apply -f "$ROOT_DIR/bootstrap/root.yaml"
 
 echo "🚀 ArgoCD is installed!"
