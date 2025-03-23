@@ -22,16 +22,15 @@ spec:
     httpEnabled: true
   hostname:
     strict: false
+    hostname: accounts.ecoma.io
+    admin: keycloak.ecoma.io
+    adminUrl: https://keycloak.ecoma.io
   ingress:
     enabled: true
     className: traefik
     annotations:
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
       cert-manager.io/cluster-issuer: cluster-issuer
-    tls:
-      - hosts:
-          - accounts.ecoma.io
-        secretName: keycloak-tls
   additionalOptions:
     - name: proxy-protocol-enabled
       value: "true"   
