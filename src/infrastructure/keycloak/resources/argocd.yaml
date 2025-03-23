@@ -1,4 +1,4 @@
-apiVersion: keycloak.org/v2alpha1
+apiVersion: keycloak.org/v1alpha1
 kind: KeycloakRealm
 metadata:
   name: argocd-realm
@@ -10,7 +10,7 @@ spec:
     realm: argocd
     enabled: true
 ---
-apiVersion: keycloak.org/v2alpha1
+apiVersion: keycloak.org/v1alpha1
 kind: KeycloakClient
 metadata:
   name: argocd-client
