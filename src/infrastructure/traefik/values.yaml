@@ -49,7 +49,7 @@ traefik:
 
 ingressRoute:
   dashboard:
-      enabled: true
+    enabled: true
 
 providers:
   kubernetesIngress:
