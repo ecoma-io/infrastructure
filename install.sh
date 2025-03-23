@@ -32,16 +32,6 @@ helm repo update traefik
 
 set -e
 
-
-echo "🚀 Installing Metrics Server..."
-helm dependency update --skip-refresh --debug "$ROOT_DIR/src/infrastructure/metrics-server"
-helm upgrade metrics-server "$ROOT_DIR/src/infrastructure/metrics-server" \
-    --debug \
-    --install \
-    --wait \
-    --namespace kube-system
-
-
 echo "🚀 Installing New Relic..."
 kubectl create namespace monitoring --dry-run=client -o yaml| kubectl apply -f -
 helm dependency update --skip-refresh --debug "$ROOT_DIR/src/infrastructure/newrelic"
@@ -50,6 +40,18 @@ helm upgrade newrelic "$ROOT_DIR/src/infrastructure/newrelic" \
     --install \
     --wait \
     --namespace monitoring
+
+echo "🚀 Installing OLM..."
+kubectl kustomize --enable-helm "$ROOT_DIR/src/infrastructure/operator-lifecycle-manager" | kubectl apply -f -
+
+
+echo "🚀 Installing Metrics Server..."
+helm dependency update --skip-refresh --debug "$ROOT_DIR/src/infrastructure/metrics-server"
+helm upgrade metrics-server "$ROOT_DIR/src/infrastructure/metrics-server" \
+    --debug \
+    --install \
+    --wait \
+    --namespace kube-system
 
 
 echo "🚀 Installing SealedSecrets..."
