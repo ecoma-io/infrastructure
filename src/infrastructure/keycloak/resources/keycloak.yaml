@@ -11,10 +11,10 @@ spec:
     database: keycloak
     usernameSecret:
       name: keycloak-secret
-      key: postgresql-username
+      key: database-username
     passwordSecret:
       name: keycloak-secret
-      key: postgresql-password
+      key: database-password
   http:
     tlsEnabled: true
   hostname:
