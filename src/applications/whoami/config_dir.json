@@ -1,0 +1,7 @@
+{
+  "name": "whoami",
+  "namespace": "testing",
+  "exclude": "*.json",
+  "include": "*.yaml",
+  "syncWave": "-2"
+}
