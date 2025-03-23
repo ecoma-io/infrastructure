@@ -23,6 +23,7 @@ spec:
   hostname:
     strict: false
     hostname: https://accounts.ecoma.io
+    admin: https://accounts.ecoma.io/admin
   additionalOptions:
     - name: proxy-protocol-enabled
       value: "true"   
