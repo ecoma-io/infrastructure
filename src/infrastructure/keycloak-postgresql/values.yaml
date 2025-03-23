@@ -4,7 +4,7 @@ postgresql:
   auth:
     username: keycloak  
     database: keycloak
-    existingSecret: keycloak-secret
+    existingSecret: keycloak-postgresql-secret
     secretKeys:
       adminPasswordKey: admin-password
       userPasswordKey: password
