@@ -39,6 +39,7 @@ configs:
       name: Keycloak
       issuer: https://accounts.ecoma.io/realms/argocd
       clientID: argocd
+      clientSecret: $keycloak-clientid-secret.clientid
       redirectURI: https://argocd.ecoma.io/auth/callback
       requestedScopes: 
         - openid 
