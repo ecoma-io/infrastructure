@@ -12,4 +12,4 @@ resources:
   - resources/secret.yaml
   - resources/keycloak.yaml
   - resources/ingress.yaml
-  - resources/argocd.yaml
+  # - resources/argocd.yaml
