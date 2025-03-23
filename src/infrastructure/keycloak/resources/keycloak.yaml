@@ -1,0 +1,57 @@
+apiVersion: k8s.keycloak.org/v2alpha1
+kind: Keycloak
+metadata:
+  name: keycloak
+  namespace: keycloak
+spec:
+  instances: 1
+  db:
+    vendor: postgres
+    host: postgres.keycloak.svc.cluster.local
+    database: keycloak
+    usernameSecret:
+      name: keycloak-db-secret
+      key: username
+    passwordSecret:
+      name: keycloak-db-secret
+      key: password
+  http:
+    tlsEnabled: true
+  hostname:
+    hostname: accounts.ecoma.io
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "256Mi"
+    limits:
+      cpu: "750m"
+      memory: "384Mi"
+  ingress:
+    enabled: true
+    className: "traefik"
+    annotations:
+      cert-manager.io/cluster-issuer: "cluster-issuer"    
+    rules:
+      - host: accounts.ecoma.io
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: keycloak
+                port:
+                  number: 80
+    tls:
+      - hosts:
+          - accounts.ecoma.io
+        secretName: keycloak-tls  
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 1
+  additionalOptions:
+    - name: KC_PROXY
+      value: "edge" 
+    - name: KC_HOSTNAME
+      value: "accounts.ecoma.io"
+    - name: KC_HTTP_ENABLED
+      value: "true"
