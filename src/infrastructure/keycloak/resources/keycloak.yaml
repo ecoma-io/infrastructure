@@ -22,8 +22,6 @@ spec:
     httpEnabled: true
   hostname:
     strict: false
-    hostname: https://accounts.ecoma.io
-    admin: https://accounts.ecoma.io/admin
   ingress:
     enabled: true
     className: traefik
