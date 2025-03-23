@@ -1,0 +1,5 @@
+{
+  "name": "keycloak-argocd",
+  "namespace": "keycloak",
+  "syncWave": "0"
+}
