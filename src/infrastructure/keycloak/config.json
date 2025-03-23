@@ -1,5 +1,5 @@
 {
   "name": "keycloak",
   "namespace": "keycloak",
-  "syncWave": "-2"
+  "syncWave": "-1"
 }

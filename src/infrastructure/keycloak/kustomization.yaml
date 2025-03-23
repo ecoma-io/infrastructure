@@ -4,10 +4,5 @@ resources:
   - https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/26.1.4/kubernetes/keycloaks.k8s.keycloak.org-v1.yml
   - https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/26.1.4/kubernetes/keycloakrealmimports.k8s.keycloak.org-v1.yml
   - https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/26.1.4/kubernetes/kubernetes.yml
-
-helmCharts:
-  - name: postgresql
-    repo: https://charts.bitnami.com/bitnami
-    version: 16.5.5
-    releaseName: postgresql
-    namespace: keycloak
+  - resources/secret.yaml
+  - resources/keycloak.yaml
