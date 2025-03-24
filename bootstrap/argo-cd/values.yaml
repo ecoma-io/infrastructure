@@ -45,9 +45,7 @@ configs:
         - openid 
         - profile
         - email
-        - roles
-      claims:
-        groups: roles.argocd 
+        - groups
    
   params:
     server.insecure: true
