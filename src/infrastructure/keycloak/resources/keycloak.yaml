@@ -299,12 +299,6 @@ spec:
           clientRole: true
           containerId: d1c055d2-8e2f-4163-9338-edb6f00d6184
           attributes: {}
-        - id: 937f0f6a-b08d-43c7-b917-96b28132871b
-          name: admin
-          composite: false
-          clientRole: true
-          containerId: d1c055d2-8e2f-4163-9338-edb6f00d6184
-          attributes: {}
         admin-cli: []
         account-console: []
         broker:
@@ -493,13 +487,14 @@ spec:
       defaultClientScopes:
       - web-origins
       - acr
-      - roles
       - profile
       - basic
       - email
       optionalClientScopes:
       - address
       - phone
+      - groups      
+      - roles
       - offline_access
       - organization
       - microprofile-jwt
