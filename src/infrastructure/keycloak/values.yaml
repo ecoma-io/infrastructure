@@ -25,9 +25,6 @@ postgresql:
 
 keycloak:
   fullnameOverride: keycloak
-  global:
-    security:
-      allowInsecureImages: true
   nodeSelector: 
     kubernetes.io/hostname: node1
   auth:
@@ -62,13 +59,6 @@ keycloak:
     hostname: keycloak.ecoma.io   
   keycloakConfigCli:
     enabled: true
-    image:
-      repository: adorsys/keycloak-config-cli
-      tag: 6.4.0-26
-    command:
-      - java
-      - -jar
-      - /app/keycloak-config-cli.jar
     cleanupAfterFinished:
       enabled: false
       seconds: 30
