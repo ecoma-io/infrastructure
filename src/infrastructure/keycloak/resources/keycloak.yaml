@@ -74,10 +74,10 @@ spec:
     registrationAllowed: true
     registrationEmailAsUsername: true
     rememberMe: true
-    verifyEmail: false
+    verifyEmail: true
     loginWithEmailAllowed: true
     duplicateEmailsAllowed: false
-    resetPasswordAllowed: false
+    resetPasswordAllowed: true
     editUsernameAllowed: false
     bruteForceProtected: false
     permanentLockout: false
