@@ -65,6 +65,7 @@ keycloak:
     image:
       repository: adorsys/keycloak-config-cli
       tag: 6.4.0-26
+    command: /app/target/keycloak-config-cli.jar
     cleanupAfterFinished:
       enabled: false
       seconds: 30
