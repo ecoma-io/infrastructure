@@ -380,7 +380,14 @@ spec:
           clientRole: true
           containerId: d192f22d-cabc-47e9-a2a4-a9bae5a4a574
           attributes: {}
-    groups: []
+    groups:
+      - id: b9c3c35d-6255-4182-815f-538f6da4b713
+        name: argocd-admin
+        path: "/argocd-admin"
+        subGroups: []
+        attributes: {}
+        realmRoles: []
+        clientRoles: {}
     defaultRole:
       id: 439b85db-3202-453d-840d-7c52f576cf91
       name: default-roles-ecoma
@@ -825,6 +832,30 @@ spec:
       attributes:
         consent.screen.text: "${offlineAccessScopeConsentText}"
         display.on.consent.screen: 'true'
+    - id: 2a30e253-bc63-4a12-be06-446d44a62e24
+      name: groups
+      description: ''
+      protocol: openid-connect
+      attributes:
+        include.in.token.scope: 'true'
+        display.on.consent.screen: 'true'
+        gui.order: ''
+        consent.screen.text: ''
+      protocolMappers:
+      - id: 8a8537a3-5ee7-4a2a-a44a-4f5a35cc290b
+        name: groups
+        protocol: openid-connect
+        protocolMapper: oidc-group-membership-mapper
+        consentRequired: false
+        config:
+          full.path: 'true'
+          introspection.token.claim: 'true'
+          userinfo.token.claim: 'true'
+          multivalued: 'true'
+          id.token.claim: 'true'
+          lightweight.claim: 'false'
+          access.token.claim: 'true'
+          claim.name: groups
     - id: '09fa2f75-5e15-43a4-989c-d2876375cc43'
       name: microprofile-jwt
       description: Microprofile - JWT built-in scope
