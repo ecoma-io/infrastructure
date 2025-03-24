@@ -45,6 +45,7 @@ configs:
         - openid 
         - profile
         - email
+        - roles
    
   params:
     server.insecure: true
