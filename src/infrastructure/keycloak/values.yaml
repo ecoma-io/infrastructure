@@ -68,7 +68,7 @@ keycloak:
     command:
       - java
       - -jar
-      - /app/target/keycloak-config-cli.jar
+      - /app/keycloak-config-cli.jar
     cleanupAfterFinished:
       enabled: false
       seconds: 30
