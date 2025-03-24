@@ -1,0 +1,10 @@
+apiVersion: v2
+name: ory-stacks
+version: 1.0.0
+dependencies:
+- name: postgresql
+  version: 16.5.5
+  repository: https://charts.bitnami.com/bitnami
+- name: kratos
+  version: 0.0.1
+  repository: https://k8s.ory.sh/helm/charts
