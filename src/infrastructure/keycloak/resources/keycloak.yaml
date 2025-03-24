@@ -384,7 +384,23 @@ spec:
       - id: b9c3c35d-6255-4182-815f-538f6da4b713
         name: argocd
         path: "/argocd"
-        subGroups: []
+        subGroups: 
+        - id: bb931f90-7e6e-40ac-9907-97b19cb58781
+          name: admin
+          path: "/argocd/admin"
+          parentId: b9c3c35d-6255-4182-815f-538f6da4b713
+          subGroups: []
+          attributes: {}
+          realmRoles: []
+          clientRoles: {}
+        - id: 529b927c-07fa-4458-b270-f08eb57ab835
+          name: viewer
+          path: "/argocd/viewer"
+          parentId: b9c3c35d-6255-4182-815f-538f6da4b713
+          subGroups: []
+          attributes: {}
+          realmRoles: []
+          clientRoles: {}
         attributes: {}
         realmRoles: []
         clientRoles: {}     
