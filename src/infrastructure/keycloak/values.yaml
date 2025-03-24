@@ -96,10 +96,10 @@ keycloak:
             name: keycloak-secret
             key: github-client-secret
     configuration: 
-      master.json: |
+      ecoma.json: |
         {
-          "id": "master",
-          "realm": "master",
+          "id": "ecoma",
+          "realm": "ecoma",
           "displayName": "Ecoma",
           "displayNameHtml": "",
           "notBefore": 0,
