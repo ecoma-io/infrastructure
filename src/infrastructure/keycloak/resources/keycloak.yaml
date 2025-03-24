@@ -41,7 +41,7 @@ metadata:
 spec:
   keycloakCRName: keycloak
   realm:
-    id: master
+    id:  458418c3-d6bf-46de-901d-833853b1b101
     realm: master
     displayName: Ecoma
     displayNameHtml: ''
