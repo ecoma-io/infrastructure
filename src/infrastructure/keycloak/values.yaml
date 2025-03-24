@@ -59,6 +59,9 @@ keycloak:
     hostname: keycloak.ecoma.io   
   keycloakConfigCli:
     enabled: true
+    image:
+      repository: adorsys/keycloak-config-cli
+      tag: 6.4.0-26
     cleanupAfterFinished:
       enabled: false
       seconds: 30
@@ -2772,6 +2775,7 @@ keycloak:
           "keycloakVersion": "26.1.4",
           "userManagedAccessAllowed": false,
           "organizationsEnabled": false,
+          "verifiableCredentialsEnabled": false,
           "adminPermissionsEnabled": false,
           "clientProfiles": {
             "profiles": []
