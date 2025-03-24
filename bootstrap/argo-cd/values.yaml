@@ -69,8 +69,8 @@ configs:
       p, role:admin, repositories, get, *, allow
       p, role:admin, certificates, get, *, allow
 
-      g, argocd-viewer, role:viewer
-      g, argocd-admin, role:admin
+      g, /argocd-viewer, role:viewer
+      g, /argocd-admin, role:admin
 
   repositories:
     ecoma:
