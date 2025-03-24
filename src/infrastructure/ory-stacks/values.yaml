@@ -36,7 +36,8 @@ kratos:
         schemas:
           - id: default
             url: file:///etc/config/identity.default.schema.json
-
+      selfservice:
+        default_browser_return_url: http://127.0.0.1:4455/
     automigration:
       enabled: true
     identitySchemas:
