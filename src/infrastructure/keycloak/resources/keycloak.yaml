@@ -41,8 +41,8 @@ metadata:
 spec:
   keycloakCRName: keycloak
   realm:
-    id: ecoma
-    realm: ecoma
+    id: master
+    realm: master
     displayName: Ecoma
     displayNameHtml: ''
     notBefore: 0
@@ -381,6 +381,13 @@ spec:
           containerId: d192f22d-cabc-47e9-a2a4-a9bae5a4a574
           attributes: {}
     groups:
+      - id: b9c3c35d-6255-4182-815f-538f6da4b713
+        name: argocd-admin
+        path: "/argocd-admin"
+        subGroups: []
+        attributes: {}
+        realmRoles: []
+        clientRoles: {}
       - id: b9c3c35d-6255-4182-815f-538f6da4b713
         name: argocd-admin
         path: "/argocd-admin"
