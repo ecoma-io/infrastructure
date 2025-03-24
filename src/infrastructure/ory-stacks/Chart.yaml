@@ -6,5 +6,5 @@ dependencies:
   version: 16.5.5
   repository: https://charts.bitnami.com/bitnami
 - name: kratos
-  version: 0.0.1
+  version: 0.52.0
   repository: https://k8s.ory.sh/helm/charts
