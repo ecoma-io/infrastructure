@@ -25,6 +25,9 @@ postgresql:
 
 keycloak:
   fullnameOverride: keycloak
+  global:
+    security:
+      allowInsecureImages: true
   nodeSelector: 
     kubernetes.io/hostname: node1
   auth:
