@@ -489,11 +489,10 @@ spec:
       - acr
       - profile
       - basic
-      - email
+      - email      
       optionalClientScopes:
       - address
       - phone
-      - groups      
       - roles
       - offline_access
       - organization
@@ -624,10 +623,18 @@ spec:
       fullScopeAllowed: true
       nodeReRegistrationTimeout: -1
       defaultClientScopes:
-      - roles
+      - web-origins
+      - acr
       - profile
-      - email
-      optionalClientScopes: []
+      - basic
+      - email      
+      optionalClientScopes:
+      - address
+      - phone
+      - roles
+      - offline_access
+      - organization
+      - microprofile-jwt
       secret: "${ARGOCD_CLIENT_SECRET}"
     - id: 21d74f1c-7278-402d-990b-2312a8395e96
       clientId: broker
@@ -1318,6 +1325,7 @@ spec:
     - web-origins
     - acr
     - basic
+    - groups
     defaultOptionalClientScopes:
     - offline_access
     - address
