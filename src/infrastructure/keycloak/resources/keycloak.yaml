@@ -387,14 +387,6 @@ spec:
           attributes: {}
           realmRoles: []
           clientRoles: {}
-        - id: 529b927c-07fa-4458-b270-f08eb57ab835
-          name: viewer
-          path: "/argocd/viewer"
-          parentId: b9c3c35d-6255-4182-815f-538f6da4b713
-          subGroups: []
-          attributes: {}
-          realmRoles: []
-          clientRoles: {}
         attributes: {}
         realmRoles: []
         clientRoles: {}     
@@ -623,18 +615,9 @@ spec:
       fullScopeAllowed: true
       nodeReRegistrationTimeout: -1
       defaultClientScopes:
-      - web-origins
-      - acr
       - profile
-      - basic
-      - email      
-      optionalClientScopes:
-      - address
-      - phone
-      - roles
-      - offline_access
-      - organization
-      - microprofile-jwt
+      - email 
+      - groups
       secret: "${ARGOCD_CLIENT_SECRET}"
     - id: 21d74f1c-7278-402d-990b-2312a8395e96
       clientId: broker
