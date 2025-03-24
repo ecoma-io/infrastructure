@@ -20,6 +20,7 @@ configs:
   ## Ref: https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/argocd-cm.yaml
   cm:
     admin.enabled: false
+    users.anonymous.enabled: false
     url: "https://argocd.ecoma.io"
     ## Ref: https://argo-cd.readthedocs.io/en/stable/user-guide/kustomize
     kustomize.buildOptions: --enable-helm
@@ -35,7 +36,7 @@ configs:
           hs.message = "Not verifying for Ingress"
           return hs
     # -- Timeout for reconciliation
-    timeout.reconciliation: 15s
+    timeout.reconciliation: 15s    
     oidc.config: |
       name: Keycloak
       issuer: https://accounts.ecoma.io/realms/ecoma
