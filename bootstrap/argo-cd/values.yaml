@@ -19,6 +19,7 @@ configs:
   # General Argo CD configuration
   ## Ref: https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/argocd-cm.yaml
   cm:
+    admin.enabled: false
     url: "https://argocd.ecoma.io"
     ## Ref: https://argo-cd.readthedocs.io/en/stable/user-guide/kustomize
     kustomize.buildOptions: --enable-helm
