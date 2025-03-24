@@ -382,19 +382,12 @@ spec:
           attributes: {}
     groups:
       - id: b9c3c35d-6255-4182-815f-538f6da4b713
-        name: argocd-admin
-        path: "/argocd-admin"
+        name: argocd
+        path: "/argocd"
         subGroups: []
         attributes: {}
         realmRoles: []
-        clientRoles: {}
-      - id: b9c3c35d-6255-4182-815f-538f6da4b713
-        name: argocd-admin
-        path: "/argocd-admin"
-        subGroups: []
-        attributes: {}
-        realmRoles: []
-        clientRoles: {}
+        clientRoles: {}     
     defaultRole:
       id: 439b85db-3202-453d-840d-7c52f576cf91
       name: default-roles-ecoma
