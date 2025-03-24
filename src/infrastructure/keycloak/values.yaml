@@ -2772,7 +2772,6 @@ keycloak:
           "keycloakVersion": "26.1.4",
           "userManagedAccessAllowed": false,
           "organizationsEnabled": false,
-          "verifiableCredentialsEnabled": false,
           "adminPermissionsEnabled": false,
           "clientProfiles": {
             "profiles": []
