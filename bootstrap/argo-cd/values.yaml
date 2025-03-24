@@ -46,6 +46,8 @@ configs:
         - profile
         - email
         - roles
+      claims:
+        groups: roles.argocd 
    
   params:
     server.insecure: true
