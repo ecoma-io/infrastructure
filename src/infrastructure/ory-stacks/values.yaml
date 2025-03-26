@@ -225,7 +225,8 @@ hydra:
         consent: https://accounts.ecoma.io/consent
         login: https://accounts.ecoma.io/login
         logout: https://accounts.ecoma.io/logout
-          
+  automigration:
+    enabled: true        
   secret:
     enabled: false
     nameOverride: hydra-secret
