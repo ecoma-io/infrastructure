@@ -204,7 +204,7 @@ kratos:
         - secretName: kratos-tls
           hosts:
             - authenticate.ecoma.io  
-  initContainers:
+  extraInitContainers:
     - name: wait-for-postgresql
       image: busybox:latest
       command:
@@ -266,11 +266,10 @@ kratosSelfserviceUiNode:
         - accounts.ecoma.io
       secretName: accounts-ui-tls
   
-
 hydraMaester:
   fullnameOverride: hydra-maester
 
-  initContainers:
+  extraInitContainers:
     - name: wait-for-postgresql
       image: busybox:latest
       command:
@@ -307,7 +306,7 @@ hydraMaester:
 
 hydra:
   fullnameOverride: hydra
-  initContainers:
+  extraInitContainers:
     - name: wait-for-postgresql
       image: busybox:latest
       command:
