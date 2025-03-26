@@ -208,13 +208,14 @@ hydra-maester:
 
 hydra:
   fullnameOverride: hydra
-  config:
-    urls:
-      self:
-        issuer: "https://authorize.ecoma.io/"
-        login: "https://accounts.ecoma.io/login"
-        consent: "https://accounts.ecoma.io/consent"
-        logout: "https://accounts.ecoma.io/logout"
+  hydra:
+    config:
+      urls:
+        self:
+          issuer: "https://authorize.ecoma.io/"
+          login: "https://accounts.ecoma.io/login"
+          consent: "https://accounts.ecoma.io/consent"
+          logout: "https://accounts.ecoma.io/logout"
   secret:
     enabled: false
     nameOverride: hydra-secret
