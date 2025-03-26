@@ -232,7 +232,7 @@ kratos-ui:
     nameOverride: accounts-ui-secret
   kratosPublicUrl: "https://authenticate.ecoma.io"
   kratosAdminUrl: "https://authenticate.ecoma.io"
-  kratosBrowserUrl: "https://accounts.ecoma.io"
+  kratosBrowserUrl: "https://authenticate.ecoma.io"
   # jwksUrl: "http://oathkeeper-api"
   ingress:
     enabled: true
