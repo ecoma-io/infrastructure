@@ -276,7 +276,7 @@ hydra:
       - name: DSN
         valueFrom:
           secretKeyRef:
-            name: kratos-secret
+            name: hydra-secret
             key: dsn
   ingress:
     public:
