@@ -271,7 +271,7 @@ hydra:
       successThreshold: 1
       periodSeconds: 5
       timeoutSeconds: 2
-      initialDelaySeconds: 30
+      initialDelaySeconds: 60
     extraEnv:
       - name: DSN
         valueFrom:
