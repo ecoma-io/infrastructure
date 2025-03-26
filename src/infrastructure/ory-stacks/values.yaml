@@ -286,6 +286,9 @@ kratos-ui:
   
 hydra:
   fullnameOverride: hydra
+  hydra-maester:
+    adminService:
+      name: hydra-maester
   hydra:
     automigration:
       enabled: true  
