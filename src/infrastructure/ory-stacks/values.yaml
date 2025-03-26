@@ -137,14 +137,33 @@ kratos:
     nameOverride: kratos-secret
 
   ingress:
-    enabled: true
-    annotations:
-      kubernetes.io/ingress.class: traefik
-    hosts:
-      - host: authenticate.ecoma.io
-        paths:
-          - path: /  
-    tls:
-      - secretName: kratos-tls
-        hosts:
-          - authenticate.ecoma.io
+    public:
+      enabled: true
+      className: traefik
+      annotations:
+        cert-manager.io/cluster-issuer: cluster-issuer
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      hosts:
+        - host: authenticate.ecoma.io
+          paths:
+            - path: /self-service/
+              pathType: Prefix
+      tls:
+        - secretName: kratos-tls
+          hosts:
+            - authenticate.ecoma.io
+    admin:
+      enabled: true
+      className: traefik      
+      annotations:
+        cert-manager.io/cluster-issuer: cluster-issuer
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      hosts:
+        - host: authenticate.ecoma.io
+          paths:
+            - path: /admin/
+              pathType: Prefix
+      tls:
+        - secretName: kratos-tls
+          hosts:
+            - authenticate.ecoma.io
