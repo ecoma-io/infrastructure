@@ -55,6 +55,7 @@ kratos:
     kubernetes.io/hostname: node1
   kratos:
     config:
+      courier: null
       identity:
         default_schema_id: default
         schemas:
@@ -62,6 +63,17 @@ kratos:
             url: file:///etc/config/identity.default.schema.json
       selfservice:
         default_browser_return_url: https://accounts.ecoma.io/
+        flows:
+          login:
+            ui_url: "https://accounts.ecoma.io/login"
+          registration:
+            ui_url: "https://accounts.ecoma.io/register"
+          recovery:
+            ui_url: "https://accounts.ecoma.io/recovery"
+          verification:
+            ui_url: "https://accounts.ecoma.io/verification"
+          settings:
+            ui_url: "https://accounts.ecoma.io/settings"
     automigration:
       enabled: true
     identitySchemas:
