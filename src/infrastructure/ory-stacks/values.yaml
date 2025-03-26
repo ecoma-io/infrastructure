@@ -165,7 +165,7 @@ kratos:
           hosts:
             - authenticate.ecoma.io  
 
-kratosSelfserviceUiNode:
+kratos-ui:
   fullnameOverride: accounts-ui
   config:
     csrfCookieName: __HOST-accounts.ecoma.io-x-csrf-token
@@ -192,7 +192,7 @@ kratosSelfserviceUiNode:
         - accounts.ecoma.io
       secretName: accounts-ui-tls
   
-hydraMaester:
+hydra-maester:
   fullnameOverride: hydra-maester
 
 hydra:
