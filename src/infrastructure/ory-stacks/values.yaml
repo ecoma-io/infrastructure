@@ -61,7 +61,7 @@ kratos:
           - id: default
             url: file:///etc/config/identity.default.schema.json
       selfservice:
-        default_browser_return_url: http://accounts.ecoma.io
+        default_browser_return_url: https://accounts.ecoma.io
     automigration:
       enabled: true
     identitySchemas:
