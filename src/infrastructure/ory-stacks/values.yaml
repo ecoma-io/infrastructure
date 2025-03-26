@@ -22,6 +22,26 @@ kratosdb:
       limits:
         cpu: 750m
         memory: 768Mi
+    initContainers:
+      - name: wait-for-postgresql-secret
+        image: busybox:latest
+        command:
+          - sh
+          - -c
+          - |
+            while [ ! -f /mnt/secrets/password ]; do
+              echo "Waiting for postgresql-secret..."
+              sleep 5
+            done
+            echo "postgresql-secret is ready!"
+        volumeMounts:
+          - name: postgresql-secret-volume
+            mountPath: /mnt/secrets
+            readOnly: true    
+    extraVolumes:
+      - name: postgresql-secret-volume
+        secret:
+          secretName: postgresql-secret
 
 hydradb:
   fullnameOverride: hydradb
@@ -47,6 +67,26 @@ hydradb:
       limits:
         cpu: 750m
         memory: 768Mi
+    initContainers:
+      - name: wait-for-postgresql-secret
+        image: busybox:latest
+        command:
+          - sh
+          - -c
+          - |
+            while [ ! -f /mnt/secrets/password ]; do
+              echo "Waiting for postgresql-secret..."
+              sleep 5
+            done
+            echo "postgresql-secret is ready!"
+        volumeMounts:
+          - name: postgresql-secret-volume
+            mountPath: /mnt/secrets
+            readOnly: true    
+    extraVolumes:
+      - name: postgresql-secret-volume
+        secret:
+          secretName: postgresql-secret
 
 kratos:
   fullnameOverride: kratos
