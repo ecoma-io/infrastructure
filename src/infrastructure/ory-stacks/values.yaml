@@ -22,26 +22,6 @@ kratosdb:
       limits:
         cpu: 750m
         memory: 768Mi
-    initContainers:
-      - name: wait-for-postgresql-secret
-        image: busybox:latest
-        command:
-          - sh
-          - -c
-          - |
-            while [ ! -f /mnt/secrets/password ]; do
-              echo "Waiting for postgresql-secret..."
-              sleep 5
-            done
-            echo "postgresql-secret is ready!"
-        volumeMounts:
-          - name: postgresql-secret-volume
-            mountPath: /mnt/secrets
-            readOnly: true    
-    extraVolumes:
-      - name: postgresql-secret-volume
-        secret:
-          secretName: postgresql-secret
 
 hydradb:
   fullnameOverride: hydradb
@@ -67,26 +47,6 @@ hydradb:
       limits:
         cpu: 750m
         memory: 768Mi
-    initContainers:
-      - name: wait-for-postgresql-secret
-        image: busybox:latest
-        command:
-          - sh
-          - -c
-          - |
-            while [ ! -f /mnt/secrets/password ]; do
-              echo "Waiting for postgresql-secret..."
-              sleep 5
-            done
-            echo "postgresql-secret is ready!"
-        volumeMounts:
-          - name: postgresql-secret-volume
-            mountPath: /mnt/secrets
-            readOnly: true    
-    extraVolumes:
-      - name: postgresql-secret-volume
-        secret:
-          secretName: postgresql-secret
 
 kratos:
   fullnameOverride: kratos
@@ -204,40 +164,6 @@ kratos:
         - secretName: kratos-tls
           hosts:
             - authenticate.ecoma.io  
-  extraInitContainers:
-    - name: wait-for-postgresql
-      image: busybox:latest
-      command:
-        - sh
-        - -c
-        - |
-          echo "Waiting for PostgreSQL..."
-          until nc -zv kratosdb 5432; do
-            echo "PostgreSQL is not ready yet..."
-            sleep 5
-          done
-          echo "PostgreSQL is ready!"
-
-    - name: wait-for-secrets
-      image: busybox:latest
-      command:
-        - sh
-        - -c
-        - |
-          echo "Waiting for kratos-secret..."
-          while [ ! -f /mnt/secrets/dsn ]; do
-            echo "Secret kratos-secret not ready..."
-            sleep 5
-          done
-          echo "kratos-secret is ready!"
-      volumeMounts:
-        - name: kratos-secret-volume
-          mountPath: /mnt/secrets
-          readOnly: true
-  extraVolumes:
-    - name: kratos-secret-volume
-      secret:
-        secretName: kratos-secret
 
 kratosSelfserviceUiNode:
   fullnameOverride: accounts-ui
@@ -269,77 +195,11 @@ kratosSelfserviceUiNode:
 hydraMaester:
   fullnameOverride: hydra-maester
 
-  extraInitContainers:
-    - name: wait-for-postgresql
-      image: busybox:latest
-      command:
-        - sh
-        - -c
-        - |
-          echo "Waiting for PostgreSQL..."
-          until nc -zv hydrasdb 5432; do
-            echo "PostgreSQL is not ready yet..."
-            sleep 5
-          done
-          echo "PostgreSQL is ready!"
-
-    - name: wait-for-secrets
-      image: busybox:latest
-      command:
-        - sh
-        - -c
-        - |
-          echo "Waiting for kratos-secret..."
-          while [ ! -f /mnt/secrets/dsn ]; do
-            echo "Secret kratos-secret not ready..."
-            sleep 5
-          done
-          echo "hydra-secret is ready!"
-      volumeMounts:
-        - name: hydra-secret-volume
-          mountPath: /mnt/secrets
-          readOnly: true
-  extraVolumes:
-    - name: hydra-secret-volume
-      secret:
-        secretName: hydra-secret
-
 hydra:
   fullnameOverride: hydra
   secret:
     enabled: false
     nameOverride: hydra-secret
-  extraInitContainers:
-    - name: wait-for-postgresql
-      image: busybox:latest
-      command:
-        - sh
-        - -c
-        - |
-          echo "Waiting for PostgreSQL..."
-          until nc -zv hydrasdb 5432; do
-            echo "PostgreSQL is not ready yet..."
-            sleep 5
-          done
-          echo "PostgreSQL is ready!"
-
-    - name: wait-for-secrets
-      image: busybox:latest
-      command:
-        - sh
-        - -c
-        - |
-          echo "Waiting for kratos-secret..."
-          while [ ! -f /mnt/secrets/dsn ]; do
-            echo "Secret kratos-secret not ready..."
-            sleep 5
-          done
-          echo "hydra-secret is ready!"
-      volumeMounts:
-        - name: hydra-secret-volume
-          mountPath: /mnt/secrets
-          readOnly: true
-  extraVolumes:
     - name: hydra-secret-volume
       secret:
         secretName: hydra-secret
