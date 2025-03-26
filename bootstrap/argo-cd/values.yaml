@@ -19,11 +19,6 @@ configs:
   # General Argo CD configuration
   ## Ref: https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/argocd-cm.yaml
   cm:
-    # CHANGE THIS ON PRODUCTION
-    # -- Timeout for reconciliation
-    timeout.reconciliation: 5s    
-    # CHANGE THIS ON PRODUCTION
-
     # admin.enabled: false
     # users.anonymous.enabled: false
     url: "https://argocd.ecoma.io"
