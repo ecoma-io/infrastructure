@@ -5,6 +5,9 @@ dependencies:
 - name: postgresql
   repository: https://charts.bitnami.com/bitnami
   version: 16.5.5
+- name: postgresql
+  repository: https://charts.bitnami.com/bitnami
+  version: 16.5.5
 - name: kratos
   repository: https://k8s.ory.sh/helm/charts
   version: 0.52.0
@@ -14,5 +17,8 @@ dependencies:
 - name: hydra
   repository: https://k8s.ory.sh/helm/charts
   version: 0.52.0
-digest: sha256:d71d7f914eab0d270d34c84c60d989cb7a678ea2795222107c383991ada72c03
-generated: "2025-03-26T20:25:14.67184502Z"
+- name: keto
+  repository: https://k8s.ory.sh/helm/charts
+  version: 0.52.0
+digest: sha256:3f80c2ad8914cf039fcb3cb7157f99ed5709bf5bd346b07c07970536fb815287
+generated: "2025-03-26T22:53:36.491056845Z"
