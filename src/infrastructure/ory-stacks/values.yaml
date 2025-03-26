@@ -99,7 +99,7 @@ kratos:
                   provider: google
                   client_id: 49648312556-mpvuf5030bpt6qlqevv1lit8c3uu5b2l.apps.googleusercontent.com
                   client_secret: ${GOOGLE_CLIENT_SECRET}
-                  scopes:
+                  scope:
                     - openid
                     - profile
                     - email
