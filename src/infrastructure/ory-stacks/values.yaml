@@ -85,14 +85,17 @@ kratos:
               oidc:
                 default_browser_return_url: https://accounts.ecoma.io/
           recovery:
+            enabled: true
             ui_url: "https://accounts.ecoma.io/recovery"
             after:
               default_browser_return_url: https://accounts.ecoma.io/
           verification:
+            enabled: true
             ui_url: "https://accounts.ecoma.io/verification"
             after:
               default_browser_return_url: https://accounts.ecoma.io/
           settings:
+            enabled: true
             ui_url: "https://accounts.ecoma.io/settings"
             after:
               default_browser_return_url: https://accounts.ecoma.io/
@@ -102,6 +105,7 @@ kratos:
         methods:
           password:
             enabled: true
+          
           oidc:
             enabled: true
             config:
