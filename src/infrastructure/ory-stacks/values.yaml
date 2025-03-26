@@ -55,7 +55,6 @@ kratos:
     kubernetes.io/hostname: node1
   kratos:
     config:
-      courier: null
       identity:
         default_schema_id: default
         schemas:
