@@ -284,6 +284,8 @@ kratos-ui:
 hydra:
   fullnameOverride: hydra
   hydra:
+    automigration:
+      enabled: true  
     config:
       urls:
         self:
@@ -293,9 +295,7 @@ hydra:
         registration: https://authenticate.ecoma.io/registration     
         consent: https://accounts.ecoma.io/consent
         identity_provider:
-          url: https://accounts.ecoma.io/app
-  automigration:
-    enabled: true        
+          url: https://accounts.ecoma.io/app        
   secret:
     enabled: false
     nameOverride: hydra-secret
