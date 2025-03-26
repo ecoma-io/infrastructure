@@ -230,9 +230,9 @@ kratos-ui:
   secret:
     enabled: false
     nameOverride: accounts-ui-secret
-  kratosPublicUrl: "http://kratos-public.ory.svc.cluster.local"
-  kratosAdminUrl: "http://kratos-admin.ory.svc.cluster.local"
-  kratosBrowserUrl: "https://authenticate.ecoma.io"
+  kratosPublicUrl: "https://authenticate.ecoma.io"
+  kratosAdminUrl: "https://authenticate.ecoma.io"
+  # kratosBrowserUrl: "https://authenticate.ecoma.io"
   # jwksUrl: "http://oathkeeper-api"
   ingress:
     enabled: true
