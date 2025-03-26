@@ -1,25 +1,64 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: accounts-ingress
+  namespace: ory
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    cert-manager.io/cluster-issuer: cluster-issuer
+spec:
+  rules:
+  - host: accounts.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: accounts-service
+            port:
+              number: 80
+  tls:
+  - hosts:
+      - accounts.example.com
+    secretName: accounts-tls
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: accounts-service
+  namespace: ory
+spec:
+  selector:
+    app: accounts-site
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: kratos-ui
+  name: accounts-site
   namespace: ory
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: kratos-ui
+      app: accounts-site
   template:
     metadata:
       labels:
-        app: kratos-ui
+        app: accounts-site
     spec:
       containers:
-      - name: kratos-ui
+      - name: accounts-site
         image: oryd/kratos-selfservice-ui-node:latest
         env:
         - name: KRATOS_PUBLIC_URL
-          value: "https://kratos.example.com/"  # Địa chỉ public API của Kratos
+          value: "https://authenticate.ecoma.io" 
         - name: KRATOS_BROWSER_URL
-          value: "https://kratos-ui.example.com/"  # URL của giao diện UI
+          value: "https://accounts.ecoma.io"
         ports:
         - containerPort: 3000
+
