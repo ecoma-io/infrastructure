@@ -288,7 +288,7 @@ hydra:
   fullnameOverride: hydra
   hydra-maester:
     adminService:
-      name: hydra-maester
+      name: hydra-admin
   hydra:
     automigration:
       enabled: true  
