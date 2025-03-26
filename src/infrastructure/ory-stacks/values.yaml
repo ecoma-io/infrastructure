@@ -112,7 +112,14 @@ kratos:
                   client_id: Ov23li943a6yVEZruicm
                   client_secret: ${GITHUB_CLIENT_SECRET}
                   scope:
+                    - read:user
                     - user:email
+                  requested_claims:
+                    id_token:
+                      email:
+                        essential: true
+                      full_name:
+                        essential: true
                 - id: google
                   mapper_url: "file:///etc/social-providers-config/google.jsonnet"
                   provider: google
@@ -152,10 +159,15 @@ kratos:
                       "via": "email"
                     }
                   }
+                },
+                "full_name":{
+                  "type":"string",
+                  "title":"Full Name"
                 }
-              },
+              },              
               "required": [
-                "email"
+                "email",
+                "full_name"
               ],
               "additionalProperties": false
             }
@@ -275,10 +287,13 @@ hydra:
     config:
       urls:
         self:
-          issuer: "https://authorize.ecoma.io/"        
+          issuer: "https://authorize.ecoma.io/"   
+        login: https://authenticate.ecoma.io/login
+        logout: https://authenticate.ecoma.io/logout
+        registration: https://authenticate.ecoma.io/registration     
         consent: https://accounts.ecoma.io/consent
-        login: https://accounts.ecoma.io/login
-        logout: https://accounts.ecoma.io/logout
+        identity_provider:
+          url: https://accounts.ecoma.io/app
   automigration:
     enabled: true        
   secret:

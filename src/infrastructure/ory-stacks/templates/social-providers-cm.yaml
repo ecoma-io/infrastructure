@@ -17,6 +17,7 @@ data:
           // Therefore we only return the email if it (a) exists and (b) is marked verified
           // by GitHub.
           [if 'email' in claims && claims.email_verified then 'email' else null]: claims.email,
+          full_name: claims.name
         },
       },
     }
@@ -29,6 +30,7 @@ data:
       identity: {
         traits: {
           [if 'email' in claims && claims.email_verified then 'email' else null]: claims.email,
+          full_name: claims.given_name + " " + claims.family_name,
           // Google can return the user's full name as a single string.
           // Make sure to adjust your identity schema to store the first and last name as separate traits.
           // first_name: claims.given_name,
