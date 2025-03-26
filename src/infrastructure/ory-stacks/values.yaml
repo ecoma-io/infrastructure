@@ -267,9 +267,9 @@ hydra:
     nameOverride: hydra-secret
   deployment:
     startupProbe:
-      failureThreshold: 50
+      failureThreshold: 100
       successThreshold: 1
-      periodSeconds: 5
+      periodSeconds: 10
       timeoutSeconds: 2
       initialDelaySeconds: 60
     extraEnv:
