@@ -59,6 +59,21 @@ spec:
           value: "https://authenticate.ecoma.io" 
         - name: KRATOS_BROWSER_URL
           value: "https://accounts.ecoma.io"
+        - name: COOKIE_SECRET          
+          valueFrom:
+            secretKeyRef:
+              name: accounts-site-secret        
+              key: secretsCookie
+        - name: CSRF_COOKIE_NAME          
+          valueFrom:
+            secretKeyRef:
+              name: accounts-site-secret        
+              key: secretsCookie
+        - name: CSRF_COOKIE_SECRET          
+          valueFrom:
+            secretKeyRef:
+              name: accounts-site-secret        
+              key: secretsCsrfCookie
         ports:
         - containerPort: 3000
 
