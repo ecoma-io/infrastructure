@@ -306,6 +306,9 @@ hydraMaester:
 
 hydra:
   fullnameOverride: hydra
+  secret:
+    enabled: false
+    nameOverride: hydra-secret
   extraInitContainers:
     - name: wait-for-postgresql
       image: busybox:latest
