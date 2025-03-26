@@ -57,6 +57,8 @@ spec:
         env:
         - name: KRATOS_PUBLIC_URL
           value: kratos-public.ory.svc.cluster.local
+        - name: KRATOS_PUBLIC_URL
+          value: kratos-admin.ory.svc.cluster.local
         - name: COOKIE_SECRET          
           valueFrom:
             secretKeyRef:
