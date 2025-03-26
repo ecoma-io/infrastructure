@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: social-providers-cm
+data:
+  github.jsonnet: |
+    local claims = {
+      email_verified: false,
+    } + std.extVar('claims');
+    {
+      identity: {
+        traits: {
+          // Allowing unverified email addresses enables account
+          // enumeration attacks, especially if the value is used for
+          // e.g. verification or as a password login identifier.
+          //
+          // Therefore we only return the email if it (a) exists and (b) is marked verified
+          // by GitHub.
+          [if 'email' in claims && claims.email_verified then 'email' else null]: claims.email,
+        },
+      },
+    }
+  google.jsonnet: |
+    local claims = {
+      email_verified: false,
+    } + std.extVar('claims');
+
+    {
+      identity: {
+        traits: {
+          [if 'email' in claims && claims.email_verified then 'email' else null]: claims.email,
+          // Google can return the user's full name as a single string.
+          // Make sure to adjust your identity schema to store the first and last name as separate traits.
+          // first_name: claims.given_name,
+          // last_name: claims.family_name,
+          //
+          // hd is the hosted domain of the user's email address.
+          // [if 'hd' in claims && claims.email_verified then 'hd' else null]: claims.hd,    },
+      },
+    }
