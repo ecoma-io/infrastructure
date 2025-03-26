@@ -19,6 +19,11 @@ configs:
   # General Argo CD configuration
   ## Ref: https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/argocd-cm.yaml
   cm:
+    # CHANGE THIS ON PRODUCTION
+    # -- Timeout for reconciliation
+    timeout.reconciliation: 5s    
+    # CHANGE THIS ON PRODUCTION
+
     # admin.enabled: false
     # users.anonymous.enabled: false
     url: "https://argocd.ecoma.io"
@@ -34,9 +39,7 @@ configs:
           hs = {}
           hs.status = "Healthy"
           hs.message = "Not verifying for Ingress"
-          return hs
-    # -- Timeout for reconciliation
-    timeout.reconciliation: 15s    
+          return hs   
     oidc.config: |
       name: Keycloak
       issuer: https://accounts.ecoma.io/realms/ecoma
@@ -51,6 +54,8 @@ configs:
    
   params:
     server.insecure: true
+    controller.status.processors: 50  
+    controller.operation.processors: 20  
 
   rbac:  
     scopes: '[groups]'
