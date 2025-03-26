@@ -74,16 +74,31 @@ kratos:
         flows:
           login:
             ui_url: "https://accounts.ecoma.io/login"
+            after:
+              default_browser_return_url: https://accounts.ecoma.io/
+              oidc:
+                default_browser_return_url: https://accounts.ecoma.io/
           registration:
             ui_url: "https://accounts.ecoma.io/registration"
+            after:
+              default_browser_return_url: https://accounts.ecoma.io/
+              oidc:
+                default_browser_return_url: https://accounts.ecoma.io/
           recovery:
             ui_url: "https://accounts.ecoma.io/recovery"
+            after:
+              default_browser_return_url: https://accounts.ecoma.io/
           verification:
             ui_url: "https://accounts.ecoma.io/verification"
+            after:
+              default_browser_return_url: https://accounts.ecoma.io/
           settings:
-            ui_url: "https://accounts.ecoma.io/settings"     
+            ui_url: "https://accounts.ecoma.io/settings"
+            after:
+              default_browser_return_url: https://accounts.ecoma.io/
           error:
-            ui_url: "https://accounts.ecoma.io/error"     
+            ui_url: "https://accounts.ecoma.io/error"
+
         methods:
           password:
             enabled: true
