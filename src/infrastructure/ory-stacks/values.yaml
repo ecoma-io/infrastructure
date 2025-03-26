@@ -61,18 +61,18 @@ kratos:
           - id: default
             url: file:///etc/config/identity.default.schema.json
       selfservice:
-        default_browser_return_url: https://authenticate.ecoma.io/
+        default_browser_return_url: https://accounts.ecoma.io/
         flows:
           login:
-            ui_url: "https://authenticate.ecoma.io/login"
+            ui_url: "https://accounts.ecoma.io/login"
           registration:
-            ui_url: "https://authenticate.ecoma.io/register"
+            ui_url: "https://accounts.ecoma.io/register"
           recovery:
-            ui_url: "https://authenticate.ecoma.io/recovery"
+            ui_url: "https://accounts.ecoma.io/recovery"
           verification:
-            ui_url: "https://authenticate.ecoma.io/verification"
+            ui_url: "https://accounts.ecoma.io/verification"
           settings:
-            ui_url: "https://authenticate.ecoma.io/settings"
+            ui_url: "https://accounts.ecoma.io/settings"
     automigration:
       enabled: true
     identitySchemas:
