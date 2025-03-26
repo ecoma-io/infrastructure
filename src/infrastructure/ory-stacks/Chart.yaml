@@ -5,6 +5,11 @@ dependencies:
 - name: postgresql
   version: 16.5.5
   repository: https://charts.bitnami.com/bitnami
+  alias: kratosdb
 - name: kratos
   version: 0.52.0
   repository: https://k8s.ory.sh/helm/charts
+- name: postgresql
+  version: 16.5.5
+  repository: https://charts.bitnami.com/bitnami
+  alias: hydradb

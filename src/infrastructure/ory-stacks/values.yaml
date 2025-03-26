@@ -1,9 +1,34 @@
-postgresql:
-  fullnameOverride: postgresql
+kratosdb:
+  fullnameOverride: kratosdb
   architecture: standalone
   auth:
     username: kratos  
     database: kratos
+    existingSecret: postgresql-secret
+    secretKeys:      
+      userPasswordKey: password
+      adminPasswordKey: admin-password
+      replicationPasswordKey: replication-password
+  primary:    
+    nodeSelector: 
+      kubernetes.io/hostname: node1
+    persistence:
+      size: 1Gi
+      storageClass: local-path
+    resources:
+      requests:
+        cpu: 500m
+        memory: 512Mi
+      limits:
+        cpu: 750m
+        memory: 768Mi
+
+hydradb:
+  fullnameOverride: hydradb
+  architecture: standalone
+  auth:
+    username: hydra  
+    database: hydra
     existingSecret: postgresql-secret
     secretKeys:      
       userPasswordKey: password
@@ -116,10 +141,10 @@ kratos:
     annotations:
       kubernetes.io/ingress.class: traefik
     hosts:
-      - host: auth.ecoma.io
+      - host: authenticate.ecoma.io
         paths:
           - path: /  
     tls:
-      - secretName: auth-tls
+      - secretName: kratos-tls
         hosts:
-          - auth.ecoma.io
+          - authenticate.ecoma.io
