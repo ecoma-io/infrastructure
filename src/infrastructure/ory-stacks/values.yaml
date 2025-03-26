@@ -95,7 +95,6 @@ kratos:
             after:
               default_browser_return_url: https://accounts.ecoma.io/
           settings:
-            enabled: true
             ui_url: "https://accounts.ecoma.io/settings"
             after:
               default_browser_return_url: https://accounts.ecoma.io/
@@ -304,12 +303,6 @@ hydra:
     enabled: false
     nameOverride: hydra-secret
   deployment:
-    startupProbe:
-      failureThreshold: 100
-      successThreshold: 1
-      periodSeconds: 10
-      timeoutSeconds: 2
-      initialDelaySeconds: 60
     extraEnv:
       - name: DSN
         valueFrom:
