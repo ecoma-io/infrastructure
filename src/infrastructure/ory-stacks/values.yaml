@@ -200,6 +200,3 @@ hydra:
   secret:
     enabled: false
     nameOverride: hydra-secret
-    - name: hydra-secret-volume
-      secret:
-        secretName: hydra-secret
