@@ -266,6 +266,12 @@ hydra:
     enabled: false
     nameOverride: hydra-secret
   deployment:
+    startupProbe:
+      failureThreshold: 5
+      successThreshold: 1
+      periodSeconds: 1
+      timeoutSeconds: 2
+      initialDelaySeconds: 10
     extraEnv:
       - name: DSN
         valueFrom:
