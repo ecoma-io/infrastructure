@@ -250,9 +250,6 @@ kratos-ui:
         - accounts.ecoma.io
       secretName: accounts-ui-tls
   
-hydra-maester:
-  fullnameOverride: hydra-maester
-
 hydra:
   fullnameOverride: hydra
   hydra:
