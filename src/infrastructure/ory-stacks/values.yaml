@@ -61,7 +61,7 @@ kratos:
           - id: default
             url: file:///etc/config/identity.default.schema.json
       selfservice:
-        default_browser_return_url: http://127.0.0.1:4455/
+        default_browser_return_url: http://accounts.ecoma.io
     automigration:
       enabled: true
     identitySchemas:
@@ -101,7 +101,6 @@ kratos:
             }
           }
         }
-
   deployment:
     extraEnv:
       - name: DSN
@@ -131,11 +130,9 @@ kratos:
             secretKeyRef:
               name: kratos-secret
               key: dsn
-
   secret:
     enabled: false
     nameOverride: kratos-secret
-
   ingress:
     public:
       enabled: true
