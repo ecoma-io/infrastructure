@@ -57,6 +57,8 @@ spec:
         env:
         - name: KRATOS_PUBLIC_URL
           value: http://kratos-public.ory.svc.cluster.local
+        - name: KRATOS_BROWSER_URL
+          value: http://authenticate.ecoma.io
         - name: KRATOS_ADMIN_URL
           value: http://kratos-admin.ory.svc.cluster.local
         - name: COOKIE_SECRET          
