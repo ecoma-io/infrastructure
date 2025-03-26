@@ -177,7 +177,7 @@ kratos-ui:
   kratosBrowserUrl: "https://authenticate.ecoma.io"
   # jwksUrl: "http://oathkeeper-api"
   ingress:
-    enabled: false
+    enabled: true
     className: traefik
     annotations:
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
