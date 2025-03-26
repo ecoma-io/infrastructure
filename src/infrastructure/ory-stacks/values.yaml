@@ -267,11 +267,11 @@ hydra:
     nameOverride: hydra-secret
   deployment:
     startupProbe:
-      failureThreshold: 15
+      failureThreshold: 60
       successThreshold: 1
       periodSeconds: 1
       timeoutSeconds: 2
-      initialDelaySeconds: 15
+      initialDelaySeconds: 30
     extraEnv:
       - name: DSN
         valueFrom:
