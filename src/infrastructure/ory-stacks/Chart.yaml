@@ -20,6 +20,6 @@ dependencies:
 # - name: hydra-maester
 #   version: 0.52.0
 #   repository: https://k8s.ory.sh/helm/charts
-# - name: hydra
-#   version: 0.52.0
-#   repository: https://k8s.ory.sh/helm/charts
+- name: hydra
+  version: 0.52.0
+  repository: https://k8s.ory.sh/helm/charts
