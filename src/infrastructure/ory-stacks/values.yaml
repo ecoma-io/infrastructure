@@ -164,3 +164,37 @@ kratos:
         - secretName: kratos-tls
           hosts:
             - authenticate.ecoma.io
+
+kratosSelfserviceUiNode:
+  fullnameOverride: accounts-ui
+  config:
+    csrfCookieName: __HOST-accounts.ecoma.io-x-csrf-token
+  secret:
+    enabled: false
+    nameOverride: accounts-ui-secret
+  kratosPublicUrl: "http://kratos-public.ory.svc.cluster.local"
+  kratosAdminUrl: "http://kratos-admin.ory.svc.cluster.local"
+  kratosBrowserUrl: "https://authenticate.ecoma.io"
+  # jwksUrl: "http://oathkeeper-api"
+  ingress:
+    enabled: false
+    className: traefik
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      cert-manager.io/cluster-issuer: cluster-issuer
+    hosts:
+      - host: accounts.ecoma.io
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    tls:
+    - hosts:
+        - accounts.ecoma.io
+      secretName: accounts-ui-tls
+  
+
+hydraMaester:
+  fullnameOverride: hydra-maester
+
+hydra:
+  fullnameOverride: hydra
