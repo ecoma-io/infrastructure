@@ -30,15 +30,11 @@ kratos:
     kubernetes.io/hostname: node1
   kratos:
     config:
-      dsn: postgres://foo:bar@pg-sqlproxy-gcloud-sqlproxy:5432/db
       identity:
         default_schema_id: default
         schemas:
           - id: default
             url: file:///etc/config/identity.default.schema.json
-      courier:
-        smtp:
-          connection_uri: smtps://test:test@mailslurper:1025/?skip_ssl_verify=true
       selfservice:
         default_browser_return_url: http://127.0.0.1:4455/
     automigration:
@@ -80,6 +76,40 @@ kratos:
             }
           }
         }
+
+  deployment:
+    extraEnv:
+      - name: DSN
+        valueFrom:
+          secretKeyRef:
+            name: kratos-secret
+            key: dsn
+  statefulSet:
+    extraEnv:
+      - name: DSN
+        valueFrom:
+          secretKeyRef:
+            name: kratos-secret
+            key: dsn
+  job:
+    extraEnv:
+      - name: DSN
+        valueFrom:
+          secretKeyRef:
+            name: kratos-secret
+            key: dsn
+  cronjob:
+    cleanup:
+      extraEnv:
+        - name: DSN
+          valueFrom:
+            secretKeyRef:
+              name: kratos-secret
+              key: dsn
+
+  secret:
+    enabled: false
+    nameOverride: kratos-secret
 
   ingress:
     enabled: true
