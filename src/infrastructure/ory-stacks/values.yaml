@@ -270,6 +270,41 @@ kratosSelfserviceUiNode:
 hydraMaester:
   fullnameOverride: hydra-maester
 
+  initContainers:
+    - name: wait-for-postgresql
+      image: busybox:latest
+      command:
+        - sh
+        - -c
+        - |
+          echo "Waiting for PostgreSQL..."
+          until nc -zv hydrasdb 5432; do
+            echo "PostgreSQL is not ready yet..."
+            sleep 5
+          done
+          echo "PostgreSQL is ready!"
+
+    - name: wait-for-secrets
+      image: busybox:latest
+      command:
+        - sh
+        - -c
+        - |
+          echo "Waiting for kratos-secret..."
+          while [ ! -f /mnt/secrets/dsn ]; do
+            echo "Secret kratos-secret not ready..."
+            sleep 5
+          done
+          echo "hydra-secret is ready!"
+      volumeMounts:
+        - name: hydra-secret-volume
+          mountPath: /mnt/secrets
+          readOnly: true
+  extraVolumes:
+    - name: hydra-secret-volume
+      secret:
+        secretName: hydra-secret
+
 hydra:
   fullnameOverride: hydra
   initContainers:
