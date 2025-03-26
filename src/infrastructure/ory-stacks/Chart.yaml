@@ -27,3 +27,6 @@ dependencies:
 - name: keto
   version: 0.52.0
   repository: https://k8s.ory.sh/helm/charts
+- name: oathkeeper
+  version: 0.52.0
+  repository: https://k8s.ory.sh/helm/charts

@@ -258,14 +258,14 @@ kratos:
         cert-manager.io/cluster-issuer: cluster-issuer
         traefik.ingress.kubernetes.io/router.entrypoints: websecure
       hosts:
-        - host: authenticate.ecoma.io
+        - host: kratos-public.ecoma.io
           paths:
             - path: /
               pathType: ImplementationSpecific
       tls:
-        - secretName: kratos-tls
+        - secretName: kratos-public-tls
           hosts:
-            - authenticate.ecoma.io
+            - kratos-public.ecoma.io
     admin:
       enabled: true
       className: traefik      
@@ -273,14 +273,14 @@ kratos:
         cert-manager.io/cluster-issuer: cluster-issuer
         traefik.ingress.kubernetes.io/router.entrypoints: websecure
       hosts:
-        - host: authenticate-admin.ecoma.io
+        - host: kratos-admin.ecoma.io
           paths:
             - path: /
               pathType: ImplementationSpecific
       tls:
         - secretName: kratos-admin-tls
           hosts:
-            - authenticate-admin.ecoma.io  
+            - kratos-admin.ecoma.io  
 
 kratos-ui:
   fullnameOverride: accounts-ui
@@ -289,9 +289,9 @@ kratos-ui:
   secret:
     enabled: false
     nameOverride: accounts-ui-secret
-  kratosPublicUrl: "https://authenticate.ecoma.io"
-  kratosAdminUrl: "https://authenticate.ecoma.io"
-  kratosBrowserUrl: "https://authenticate.ecoma.io"
+  kratosPublicUrl: "https://kratos-public.ecoma.io"
+  kratosAdminUrl: "https://kratos-admin.ecoma.io"
+  kratosBrowserUrl: "https://kratos-public.ecoma.io"
   # jwksUrl: "http://oathkeeper-api"
   ingress:
     enabled: true
@@ -321,9 +321,9 @@ hydra:
       urls:
         self:
           issuer: "https://authorize.ecoma.io/"   
-        login: https://authenticate.ecoma.io/login
-        logout: https://authenticate.ecoma.io/logout
-        registration: https://authenticate.ecoma.io/registration     
+        login: https://kratos.ecoma.io/login
+        logout: https://kratos.ecoma.io/logout
+        registration: https://kratos.ecoma.io/registration     
         consent: https://accounts.ecoma.io/consent
         identity_provider:
           url: https://accounts.ecoma.io/app        
@@ -345,14 +345,14 @@ hydra:
         cert-manager.io/cluster-issuer: cluster-issuer
         traefik.ingress.kubernetes.io/router.entrypoints: websecure
       hosts:
-        - host: authorize.ecoma.io
+        - host: hydra-public.ecoma.io
           paths:
             - path: /
               pathType: ImplementationSpecific
       tls:
       - hosts:
-          - authorize.ecoma.io
-        secretName: hydra-tls
+          - hydra-public.ecoma.io
+        secretName: hydra-public-tls
     admin:
       enabled: true
       className: traefik
@@ -360,13 +360,13 @@ hydra:
         cert-manager.io/cluster-issuer: cluster-issuer
         traefik.ingress.kubernetes.io/router.entrypoints: websecure
       hosts:
-        - host: authorize-admin.ecoma.io
+        - host: hydra-admin.ecoma.io
           paths:
             - path: /
               pathType: ImplementationSpecific
       tls:
       - hosts:
-          - authorize-admin.ecoma.io
+          - hydra-admin.ecoma.io
         secretName: hydra-admin-tls 
 
 keto:
@@ -387,51 +387,115 @@ keto:
     read:
       className: traefik
       hosts:
-        - host: authorization.ecoma.io
+        - host: keto.ecoma.io
           paths:
             - path: /read
               pathType: Prefix
       tls:
       - hosts:
-          - authorization.ecoma.io
-        secretName: hydra-admin-tls 
+          - keto.ecoma.io
+        secretName: keto-tls 
     write:
       className: traefik
       hosts:
-        - host: authorization.ecoma.io
+        - host: keto-write.ecoma.io
           paths:
             - path: /write
               pathType: Prefix
       tls:
       - hosts:
-          - authorization.ecoma.io
-        secretName: hydra-admin-tls 
+          - keto.ecoma.io
+        secretName: keto-tls 
 
 oathkeeper:
   fullnameOverride: oathkeeper
+  oathkeeper:
+    config:
+      # authorizers:
+      #   allowed:
+      #     handler: allow
+      #   deny:
+      #     handler: deny
+      # authenticators:
+      #   jwt:
+      #     jwks_urls:
+      #       - http://sentinel-api/.well-known/jwks.json
+      #     rule:
+      #       allowed_algorithms:
+      #         - RS256
+      #       required_scope: ["openid"]
+      #       required_audience: ["oathkeeper-api"]
+      #       required_issuer: "https://kratos.ecoma.io/"
+      # rules:
+      #   - id: allow
+      #     description: "Allow all requests"
+      #     match:
+      #       url: ".*"
+      #     authenticators:
+      #       - handler: jwt
+      #     authorizer:
+      #       handler: allow
+      domain:
+        proxy: https://oathkeeper-proxy.ecoma.io
+        api: https://oathkeeper-api.ecoma.io
+      proxy:
+        trust_forwarded_headers: true
+        strip_path: true
+        timeout:
+          read: 5s
+          write: 5s
+          idle: 5s
+        cors:
+          enabled: false
+          allowed_origins:
+            - https://ecoma.io
+            - https://*.ecoma.io
+          allowed_methods:
+            - GET
+          allowed_headers:
+            - ""
+          exposed_headers:
+            - ""
+          allow_credentials: true
+          max_age: -100000000
+    deployment:
+      nodeSelector: 
+        kubernetes.io/hostname: node1
+    extraEnv:
+      - name: DSN
+        valueFrom:
+          secretKeyRef:
+            name: oathkeeper-secret
+            key: dsn
   deployment:
     nodeSelector: 
       kubernetes.io/hostname: node1
   ingress:
-    read:
+    proxy:
       className: traefik
+      annotations:
+        cert-manager.io/cluster-issuer: cluster-issuer
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
       hosts:
-        - host: sentinel.ecoma.io
+        - host: oathkeeper-proxy.ecoma.io
           paths:
-            - path: /read
+            - path: /
               pathType: Prefix
       tls:
       - hosts:
           - sentinel.ecoma.io
-        secretName: hydra-admin-tls 
-    write:
+        secretName: oathkeeper-proxy-tls 
+    api:
       className: traefik
+      annotations:
+        cert-manager.io/cluster-issuer: cluster-issuer
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
       hosts:
-        - host: sentinel.ecoma.io
+        - host: oathkeeper-api.ecoma.io
           paths:
-            - path: /write
+            - path: /
               pathType: Prefix
       tls:
       - hosts:
-          - sentinel.ecoma.io
-        secretName: hydra-admin-tls 
+          - sentinel-api.ecoma.io
+        secretName: oathkeeper-api-tls 
