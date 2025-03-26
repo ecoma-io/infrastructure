@@ -57,8 +57,6 @@ spec:
         env:
         - name: KRATOS_PUBLIC_URL
           value: "http://kratos-public:80" 
-        - name: KRATOS_BROWSER_URL
-          value: "https://accounts.ecoma.io"
         - name: COOKIE_SECRET          
           valueFrom:
             secretKeyRef:
