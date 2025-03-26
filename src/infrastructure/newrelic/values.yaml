@@ -139,18 +139,18 @@ newrelic:
 
   newrelic-prometheus-agent:
     # newrelic-prometheus-agent.enabled -- Install the [`newrelic-prometheus-agent` chart](https://github.com/newrelic/newrelic-prometheus-configurator/tree/main/charts/newrelic-prometheus-agent)
-    enabled: true  
-    config:
-      common:        
-        scrape_interval: 60s 
-    resources:
-      prometheus:
-        limits:
-          cpu: 75m
-          memory: 96Mi
-        requests:
-          cpu: 50m
-          memory: 64Mi
+    enabled: false  
+    # config:
+    #   common:        
+    #     scrape_interval: 60s 
+    # resources:
+    #   prometheus:
+    #     limits:
+    #       cpu: 75m
+    #       memory: 96Mi
+    #     requests:
+    #       cpu: 50m
+    #       memory: 64Mi
     
 
   newrelic-eapm-agent:
