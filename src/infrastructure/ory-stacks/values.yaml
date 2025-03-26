@@ -75,14 +75,18 @@ kratos:
           login:
             ui_url: "https://accounts.ecoma.io/login"
           registration:
-            ui_url: "https://accounts.ecoma.io/register"
+            ui_url: "https://accounts.ecoma.io/registration"
           recovery:
             ui_url: "https://accounts.ecoma.io/recovery"
           verification:
             ui_url: "https://accounts.ecoma.io/verification"
           settings:
-            ui_url: "https://accounts.ecoma.io/settings"        
+            ui_url: "https://accounts.ecoma.io/settings"     
+          error:
+            ui_url: "https://accounts.ecoma.io/error"     
         methods:
+          password:
+            enabled: true
           oidc:
             enabled: true
             config:
