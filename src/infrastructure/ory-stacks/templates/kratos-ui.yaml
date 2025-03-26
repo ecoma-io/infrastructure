@@ -56,9 +56,9 @@ spec:
         image: oryd/kratos-selfservice-ui-node:latest
         env:
         - name: KRATOS_PUBLIC_URL
-          value: kratos-public.ory.svc.cluster.local
-        - name: KRATOS_PUBLIC_URL
-          value: kratos-admin.ory.svc.cluster.local
+          value: http://kratos-public.ory.svc.cluster.local
+        - name: KRATOS_ADMIN_URL
+          value: http://kratos-admin.ory.svc.cluster.local
         - name: COOKIE_SECRET          
           valueFrom:
             secretKeyRef:
