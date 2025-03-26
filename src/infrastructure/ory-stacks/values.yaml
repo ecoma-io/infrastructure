@@ -55,6 +55,15 @@ kratos:
     kubernetes.io/hostname: node1
   kratos:
     config:
+      cookies:
+        domain: ecoma.io
+        path: /
+        same_site: Lax
+      session:
+        cookie:          
+          domain: ecoma.io
+          path: /
+          same_site: Lax
       identity:
         default_schema_id: default
         schemas:
@@ -179,7 +188,7 @@ kratos:
 kratos-ui:
   fullnameOverride: accounts-ui
   config:
-    csrfCookieName: __HOST-accounts.ecoma.io-x-csrf-token
+    csrfCookieName: ecoma-x-csrf-token
   secret:
     enabled: false
     nameOverride: accounts-ui-secret
@@ -212,7 +221,10 @@ hydra:
     config:
       urls:
         self:
-          issuer: "https://authorize.ecoma.io/"
+          issuer: "https://authorize.ecoma.io/"        
+        consent: https://accounts.ecoma.io/consent
+        login: https://accounts.ecoma.io/login
+        logout: https://accounts.ecoma.io/logout
           
   secret:
     enabled: false
