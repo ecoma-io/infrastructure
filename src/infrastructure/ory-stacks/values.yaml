@@ -88,14 +88,14 @@ kratos:
           config:
             providers:
               - id: github
-                mapper_url: "file:///etc/config/github.jsonnet"
+                mapper_url: "file:///etc/social-providers-config/github.jsonnet"
                 provider: github
                 client_id: Ov23li943a6yVEZruicm
                 client_secret: ${GITHUB_CLIENT_SECRET}
                 scope:
                   - user:email
               - id: google
-                mapper_url: "file:///etc/config/google.jsonnet"
+                mapper_url: "file:///etc/social-providers-config/google.jsonnet"
                 provider: google
                 client_id: 49648312556-mpvuf5030bpt6qlqevv1lit8c3uu5b2l.apps.googleusercontent.com
                 client_secret: ${GOOGLE_CLIENT_SECRET}
@@ -149,7 +149,7 @@ kratos:
           name: social-providers-cm
     extraVolumeMounts:
       - name: social-providers-cm
-        mountPath: /etc/config
+        mountPath: /etc/social-providers-config
     extraEnv:
       - name: DSN
         valueFrom:
