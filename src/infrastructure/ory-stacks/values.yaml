@@ -154,8 +154,8 @@ kratos:
       hosts:
         - host: authenticate.ecoma.io
           paths:
-            - path: /self-service/
-              pathType: Prefix
+            - path: /
+              pathType: ImplementationSpecific
       tls:
         - secretName: kratos-tls
           hosts:
@@ -167,14 +167,14 @@ kratos:
         cert-manager.io/cluster-issuer: cluster-issuer
         traefik.ingress.kubernetes.io/router.entrypoints: websecure
       hosts:
-        - host: authenticate.ecoma.io
+        - host: authenticate-admin.ecoma.io
           paths:
-            - path: /admin/
-              pathType: Prefix
+            - path: /
+              pathType: ImplementationSpecific
       tls:
-        - secretName: kratos-tls
+        - secretName: kratos-admin-tls
           hosts:
-            - authenticate.ecoma.io  
+            - authenticate-admin.ecoma.io  
 
 kratos-ui:
   fullnameOverride: accounts-ui
@@ -208,6 +208,51 @@ hydra-maester:
 
 hydra:
   fullnameOverride: hydra
+  config:
+    urls:
+      self:
+        issuer: "https://authorize.ecoma.io/"
+        login: "https://accounts.ecoma.io/login"
+        consent: "https://accounts.ecoma.io/consent"
+        logout: "https://accounts.ecoma.io/logout"
   secret:
     enabled: false
     nameOverride: hydra-secret
+  deployment:
+    extraEnv:
+      - name: DSN
+        valueFrom:
+          secretKeyRef:
+            name: kratos-secret
+            key: dsn
+  ingress:
+    public:
+      enabled: true
+      className: traefik
+      annotations:
+        cert-manager.io/cluster-issuer: cluster-issuer
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      hosts:
+        - host: authorize.ecoma.io
+          paths:
+            - path: /
+              pathType: ImplementationSpecific
+      tls:
+      - hosts:
+          - authorize.ecoma.io
+        secretName: hydra-tls
+    admin:
+      enabled: true
+      className: traefik
+      annotations:
+        cert-manager.io/cluster-issuer: cluster-issuer
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      hosts:
+        - host: authorize-admin.ecoma.io
+          paths:
+            - path: /
+              pathType: ImplementationSpecific
+      tls:
+      - hosts:
+          - authorize-admin.ecoma.io
+        secretName: hydra-admin-tls 
