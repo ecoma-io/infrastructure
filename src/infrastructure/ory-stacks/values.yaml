@@ -81,7 +81,28 @@ kratos:
           verification:
             ui_url: "https://accounts.ecoma.io/verification"
           settings:
-            ui_url: "https://accounts.ecoma.io/settings"
+            ui_url: "https://accounts.ecoma.io/settings"        
+      methods:
+        oidc:
+          enabled: true
+          config:
+            providers:
+              - id: github
+                mapper_url: "file:///etc/config/github.jsonnet"
+                provider: github
+                client_id: Ov23li943a6yVEZruicm
+                client_secret: ${GITHUB_CLIENT_SECRET}
+                scope:
+                  - user:email
+              - id: google
+                mapper_url: "file:///etc/config/google.jsonnet"
+                provider: google
+                client_id: 49648312556-mpvuf5030bpt6qlqevv1lit8c3uu5b2l.apps.googleusercontent.com
+                client_secret: ${GOOGLE_CLIENT_SECRET}
+                scopes:
+                  - openid
+                  - profile
+                  - email
     automigration:
       enabled: true
     identitySchemas:
@@ -122,12 +143,29 @@ kratos:
           }
         }
   deployment:
+    extraVolumes:
+      - name: social-providers-cm
+        configMap:
+          name: social-providers-cm
+    extraVolumeMounts:
+      - name: social-providers-cm
+        mountPath: /etc/config
     extraEnv:
       - name: DSN
         valueFrom:
           secretKeyRef:
             name: kratos-secret
             key: dsn
+      - name: GITHUB_CLIENT_SECRET
+        valueFrom:
+          secretKeyRef:
+            name: kratos-secret
+            key: github-client-secret
+      - name: GOOGLE_CLIENT_SECRET
+        valueFrom:
+          secretKeyRef:
+            name: kratos-secret
+            key: google-client-secret
   statefulSet:
     extraEnv:
       - name: DSN
