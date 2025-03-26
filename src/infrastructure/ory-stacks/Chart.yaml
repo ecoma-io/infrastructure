@@ -10,6 +10,10 @@ dependencies:
   version: 16.5.5
   repository: https://charts.bitnami.com/bitnami
   alias: hydradb
+- name: postgresql
+  version: 16.5.5
+  repository: https://charts.bitnami.com/bitnami
+  alias: ketodb
 - name: kratos
   version: 0.52.0
   repository: https://k8s.ory.sh/helm/charts
@@ -18,5 +22,8 @@ dependencies:
   repository: https://k8s.ory.sh/helm/charts
   alias: kratos-ui
 - name: hydra
+  version: 0.52.0
+  repository: https://k8s.ory.sh/helm/charts
+- name: keto
   version: 0.52.0
   repository: https://k8s.ory.sh/helm/charts
