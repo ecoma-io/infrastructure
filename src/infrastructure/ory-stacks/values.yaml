@@ -269,8 +269,8 @@ hydra:
     startupProbe:
       failureThreshold: 50
       successThreshold: 1
-      periodSeconds: 1
-      timeoutSeconds: 5
+      periodSeconds: 5
+      timeoutSeconds: 2
       initialDelaySeconds: 30
     extraEnv:
       - name: DSN
