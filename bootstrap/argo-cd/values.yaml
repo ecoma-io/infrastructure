@@ -120,3 +120,13 @@ server:
         secretName: argocd-server-tls
     # -- Uses `server.service.servicePortHttps` instead `server.service.servicePortHttp`
     https: false
+
+controller:
+  config:
+    webhook:
+      github:
+        enabled: true
+        webhookSecret:
+          secretName: "argocd-webhook-secret"
+          secretKey: "github"
+        url: "https://argocd.ecoma.io/api/webhook"
