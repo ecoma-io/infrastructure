@@ -411,65 +411,15 @@ oathkeeper:
   fullnameOverride: oathkeeper
   oathkeeper:
     config:
-      # authorizers:
-      #   allowed:
-      #     handler: allow
-      #   deny:
-      #     handler: deny
-      # authenticators:
-      #   jwt:
-      #     jwks_urls:
-      #       - http://sentinel-api/.well-known/jwks.json
-      #     rule:
-      #       allowed_algorithms:
-      #         - RS256
-      #       required_scope: ["openid"]
-      #       required_audience: ["oathkeeper-api"]
-      #       required_issuer: "https://kratos.ecoma.io/"
-      # rules:
-      #   - id: allow
-      #     description: "Allow all requests"
-      #     match:
-      #       url: ".*"
-      #     authenticators:
-      #       - handler: jwt
-      #     authorizer:
-      #       handler: allow
-      # domain:
-      #   proxy: https://oathkeeper-proxy.ecoma.io
-      #   api: https://oathkeeper-api.ecoma.io
-      # proxy:
-      #   trust_forwarded_headers: true
-      #   strip_path: true
-      #   timeout:
-      #     read: 5s
-      #     write: 5s
-      #     idle: 5s
-      #   cors:
-      #     enabled: false
-      #     allowed_origins:
-      #       - https://ecoma.io
-      #       - https://*.ecoma.io
-      #     allowed_methods:
-      #       - GET
-      #     allowed_headers:
-      #       - ""
-      #     exposed_headers:
-      #       - ""
-      #     allow_credentials: true
-      #     max_age: -100000000
-    deployment:
-      nodeSelector: 
-        kubernetes.io/hostname: node1
+  deployment:
+    nodeSelector: 
+      kubernetes.io/hostname: node1
     extraEnv:
       - name: DSN
         valueFrom:
           secretKeyRef:
             name: oathkeeper-secret
             key: dsn
-  deployment:
-    nodeSelector: 
-      kubernetes.io/hostname: node1
   ingress:
     proxy:
       className: traefik
