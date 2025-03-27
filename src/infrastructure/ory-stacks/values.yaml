@@ -438,26 +438,26 @@ oathkeeper:
       # domain:
       #   proxy: https://oathkeeper-proxy.ecoma.io
       #   api: https://oathkeeper-api.ecoma.io
-      proxy:
-        trust_forwarded_headers: true
-        strip_path: true
-        timeout:
-          read: 5s
-          write: 5s
-          idle: 5s
-        cors:
-          enabled: false
-          allowed_origins:
-            - https://ecoma.io
-            - https://*.ecoma.io
-          allowed_methods:
-            - GET
-          allowed_headers:
-            - ""
-          exposed_headers:
-            - ""
-          allow_credentials: true
-          max_age: -100000000
+      # proxy:
+      #   trust_forwarded_headers: true
+      #   strip_path: true
+      #   timeout:
+      #     read: 5s
+      #     write: 5s
+      #     idle: 5s
+      #   cors:
+      #     enabled: false
+      #     allowed_origins:
+      #       - https://ecoma.io
+      #       - https://*.ecoma.io
+      #     allowed_methods:
+      #       - GET
+      #     allowed_headers:
+      #       - ""
+      #     exposed_headers:
+      #       - ""
+      #     allow_credentials: true
+      #     max_age: -100000000
     deployment:
       nodeSelector: 
         kubernetes.io/hostname: node1
