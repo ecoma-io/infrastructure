@@ -435,9 +435,9 @@ oathkeeper:
       #       - handler: jwt
       #     authorizer:
       #       handler: allow
-      domain:
-        proxy: https://oathkeeper-proxy.ecoma.io
-        api: https://oathkeeper-api.ecoma.io
+      # domain:
+      #   proxy: https://oathkeeper-proxy.ecoma.io
+      #   api: https://oathkeeper-api.ecoma.io
       proxy:
         trust_forwarded_headers: true
         strip_path: true
