@@ -1,7 +1,0 @@
-{
-  "name": "ecoma-internal",
-  "namespace": "ecoma-internal",
-  "exclude": "*.json",
-  "include": "*.yaml",
-  "syncWave": "-2"
-}
