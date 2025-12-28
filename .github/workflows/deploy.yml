@@ -1,0 +1,50 @@
+name: Deploy Infrastructure
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+
+
+
+  deploy:
+    runs-on: ubuntu-latest
+    steps: 
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v4
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci-provisioner
+          ping: ${{ secrets.PM_IP }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Terraform Init
+        working-directory: ./terraform
+        run: terraform init
+        env:
+          TF_VAR_proxmox_api_url: https://${{ secrets.PM_IP }}:8006/
+          TF_VAR_proxmox_user: ${{ secrets.PM_USER }}
+          TF_VAR_proxmox_password: ${{ secrets.PM_PASSWORD }}
+
+      - name: Terraform Apply
+        working-directory: ./terraform
+        run: terraform apply -auto-approve
+        env:
+          TF_VAR_proxmox_api_url: https://${{ secrets.PM_IP }}:8006/
+          TF_VAR_proxmox_user: ${{ secrets.PM_USER }}
+          TF_VAR_proxmox_password: ${{ secrets.PM_PASSWORD }}
+          TF_VAR_vm_user: ${{ secrets.SSH_USERNAME }}
+          TF_VAR_vm_password: ${{ secrets.SSH_PASSWORD }}
+          TF_VAR_vm_ssh_key: ${{ secrets.SSH_PUBLIC_KEY }}
+
+     
