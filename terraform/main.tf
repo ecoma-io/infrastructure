@@ -3,7 +3,7 @@ resource "proxmox_virtual_environment_vm" "vms" {
   name        = each.key
   node_name   = each.value.pve_node
   vm_id       = each.value.id
-
+  tags        = [split("-", each.key)[0]] 
   clone {
     vm_id = each.value.template
     full  = true
