@@ -47,4 +47,37 @@ jobs:
           TF_VAR_vm_password: ${{ secrets.SSH_PASSWORD }}
           TF_VAR_vm_ssh_key: ${{ secrets.SSH_PUBLIC_KEY }}
 
+      - name: Generate Ansible Inventory
+        shell: bash
+        run: |               
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > /tmp/ssh_key
+          chmod 600 /tmp/ssh_key
+
+          cd terraform
+          terraform output -json ansible_inventory | grep '^{' > ../tf_output.json
+          cd ..          
+          SSH_USER=$(jq -r '.username' tf_output.json)
+          SSH_PASS=$(jq -r '.password' tf_output.json)          
+          cat <<EOF > ansible/inventory.yml
+          all:
+            vars:
+              ansible_user: "$SSH_USER"
+              ansible_become_password: "$SSH_PASS"
+              ansible_ssh_private_key_file: "/tmp/ssh_key"
+              ansible_python_interpreter: "/usr/bin/python3.11"
+            children:
+          EOF
+          jq -r '.vms | to_entries[] | "    " + .key + ":\n      hosts:\n" + ( [.value[] | "        " + .hostname + ":\n          ansible_host: " + .ip ] | join("\n") )' tf_output.json >> ansible/inventory.yml
+
+      - name: Run Ansible Playbook
+        shell: bash
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: 'False'
+        run: |
+          cat ansible/inventory.yml
+          # Run playbook         
+          ansible-playbook -i ansible/inventory.yml ansible/playbook.yml
+        
+        
+
      
