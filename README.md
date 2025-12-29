@@ -1,44 +1,179 @@
-# Infrastructure Deployment
+# Ecoma's Infrastructure 
 
-This repository contains the Terraform and Ansible code to deploy a K3s cluster and a PostgreSQL node on Proxmox.
+This repository is infrastrucure as code (IaC) contains the Terraform and Ansible code to define ecoma infrastructure. And auto deploy with CI/CD
 
-## Prerequisites
+## Getting Started
 
-1.  **Proxmox**:
-    *   User with permissions to create VMs.
-    *   Storage pools configured: `ssd` (SSD), `nvme` (NVMe), `hdd` (HDD).
-    *   Cloud-init template (e.g., `debian12-template` with template id).
-    *   Install tailscale with subnet router configured to allow access to the Proxmox network.
-3.  **GitHub Secrets**:
-    *   `TF_API_TOKEN`: Terraform Cloucd API Token
-    *   `PM_IP`: Proxmox API Tailscal IP (e.g., `100.x.y.z`).
-    *   `PM_USER`: Proxmox User (e.g., `terraform@pve!token`).
-    *   `PM_PASSWORD`: Proxmox Token/Password.
-    *   `TS_OAUTH_CLIENT_ID`: Tailscale OAuth Client ID.
-    *   `TS_OAUTH_SECRET`: Tailscale OAuth Secret.
-    *   `SSH_USERNAME`: The username for access to ssh VM
-    *   `SSH_PASSWORD`: The password for access to ssh VM (Only use for sudo permision and direct console in promox. Can't remote ssh) 
-    *   `SSH_PUBLIC_KEY`: Public key for VM access.
-    *   `SSH_PRIVATE_KEY`: Private key for Ansible access to VM
+*   **Terraform**: 
+- `terraform/main.tf`: Root module orchestrating sub-modules for different providers.
+- `terraform/modules/`: Contains provider-specific logic (proxmox_compute, aws_compute, gcp_compute, oci_compute).
+- `terraform/providers.tf`: Provider configuration (Proxmox, AWS, GCP, OCI).
+- `terraform/variables.tf`: Declarations of input variables and default values used by the module.
+- `terraform/terraform.tfvars`: Centralized configuration for all VMs across all providers.
+- `terraform/outputs.tf`: Aggregated outputs exported by Terraform (includes `ansible_inventory` JSON used to generate Ansible inventory).
 
-## Customization
+*   **Ansible**: 
+-  `ansible/playbook.yaml` Definitation playbook
 
-*   **Terraform**: Edit `terraform/terraform.tfvars` to change VMs definitations.
-*   **Ansible**: Edit `ansible/group_vars/all.yml` to change K3s version or token.
 
 ## Architecture
 
-- **Controlplan Database**: 2vCPU, 1.75GB RAM, 15GB SSD (OS), 10GB NVMe (6.5GB Data/3.5GB Swap).
-- **Controlplan**: 2vCPU, 4GB RAM, 20GB SSD (OS), 4GB NVMe (Swap).
-- **Ops**: 4vCPU, 8GB RAM, 120GB SSD (OS), 8GB NVMe (Swap).
-- **Statefulset**: 6vCPU, 12GB RAM, 900GB NVMe (OS/Data), 4TB HDD (Data).
-- **Worker**: 4vCPU, 4GB RAM, 30GB NVMe (OS/Data)
+### Roles 
+The system divides the nodes into 5 roles.
+
+1. Control Plane Database (cdb)
+  - Run PostgreSQL as the K3s datastore instead of etcd.
+  - Prioritize IOPS (NVMe) to reduce API server latency.
+  - Low CPU variability, but require stable RAM for query caching.
+  - PostgreSQL installed directly on the host OS.
+
+2. Control Plane (cpl)
+  - Run k3s server, manage scheduling, API, and core components.
+  - Do not run user workloads to ensure API uptime.
+
+3. Operator (ops)
+  - Management and monitoring brain (ArgoCD, Grafana/Prometheus stack).
+  - Node balancing IO, CPU, and RAM.
+
+4. Statefulset (sts)
+  - Run system stateful services: MongoDB, RabbitMQ, SeaweedFS, KurentDB.
+  - Primarily scale vertically rather than horizontally.
+
+5. Worker (application workloads)
+  - Run business-logic microservices (stateless).
+  - Typically scaled horizontally (scale-out).
+  - Flexible resources, often CPU-intensive.
+  - Do not hold critical data and can be restarted at any time.
+
+### Hybrid Cloud Infrastructure
+
+- On-premise costs are typically lower than cloud, so on-premise resources handle steady-state workloads to reduce expenses.  
+- When compute demand spikes (e.g., promotional periods or large campaigns), the system can automatically expand to the cloud to handle the load without investing in additional on-site hardware (cloud bursting) until demand stabilizes and further on-premise investment is justified.  
+- Redundancy: the cloud environment serves as a standby for disaster recovery or maintenance, reducing downtime and ensuring stable operations.
+- **Multi-Cloud Support**: The infrastructure is designed to be provider-agnostic, supporting Proxmox (On-Prem), AWS, GCP, and OCI seamlessly via modular Terraform architecture.
+
+### Comunication/Security
+- Nodes located on different infrastructures (cloud/on-premise) will communicate with each other via tailscale with subnet router configured. 
+- Administrators and CI/CD teams will be required to have permissions and join the Tailscale network in order to access and control the cluster via web-ui/ssh.
+- All SSH access will use a separate account to ensure auditability and only SSH keys (not passwords) can be used to prevent brute-force attacks.
+
 
 ## CI/CD
 
 1.  Push to `main` branch.
 2.  GitHub Actions will:
     *   Connect to Tailscale.
-    *   Run Terraform to provision VMs.
-    *   Generate Ansible inventory.
+    *   Run Terraform to provision VMs across configured providers.
+    *   Terraform will generate outputs (See example of output bellow)
+    *   Generate Ansible inventory (See example of inventory bellow)
     *   Run Ansible to configure OS, Storage, and K3s.
+
+## Example of outputs
+```
+{
+  "username": "ssh_user",
+  "password": "ssh_password",
+  "vms": {
+    "cdb": [
+      {
+        "hostname": "cdb-1",
+        "ip": "192.168.31.102",
+        "provider": "proxmox",
+        "disks": [
+          {
+            "name": "os",
+            "tier": "warm"
+          },
+          {
+            "name": "data-0",
+            "tier": "swap"
+          }
+        ]
+      }
+    ],
+    "cpl": [
+      {
+        "hostname": "cpl-1",
+        "ip": "192.168.31.103",
+        "provider": "proxmox",
+        "disks": [
+          {
+            "name": "os",
+            "tier": "warm"
+          }
+        ]
+      }
+    ],
+    "wkr": [
+      {
+        "hostname": "wkr-cloud-1",
+        "ip": "3.1.2.3",
+        "provider": "aws",
+        "disks": [
+          {
+            "name": "os",
+            "tier": "hot"
+          },
+          {
+            "name": "data-0",
+            "tier": "hot"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+## Example of inventory
+
+```yaml
+all:
+  vars:
+    ansible_user: "ssh_user"
+    ansible_become_password: "ssh_password"
+    ansible_ssh_private_key_file: "/tmp/ssh_key"
+    ansible_python_interpreter: "/usr/bin/python3.11"
+  children:
+    cdb:
+      hosts:
+        cdb-1:
+          ansible_host: 192.168.31.102
+          provider: proxmox
+          disks:
+            - name: "os"
+              tier: "warm"
+            - name: "data-0"
+              tier: "swap"
+    cpl:
+      hosts:
+        cpl-1:
+          ansible_host: 192.168.31.103
+          provider: proxmox
+          disks:
+            - name: "os"
+              tier: "warm"
+    wkr:
+      hosts:
+        wkr-cloud-1:
+          ansible_host: 3.1.2.3
+          provider: aws
+          disks:
+            - name: "os"
+              tier: "hot"
+            - name: "data-0"
+              tier: "hot"
+```
+
+
+## Secrets:
+  *   `TF_API_TOKEN`: Terraform Cloud API Token
+  *   `PM_IP`: Proxmox API Tailscale IP.
+  *   `PM_USER`: Proxmox User.
+  *   `PM_PASSWORD`: Proxmox Token/Password.
+  *   `TS_OAUTH_CLIENT_ID`: Tailscale OAuth Client ID.
+  *   `TS_OAUTH_SECRET`: Tailscale OAuth Secret.
+  *   `SSH_USERNAME`: The username for access to ssh VM
+  *   `SSH_PASSWORD`: The password for access to ssh VM
+  *   `SSH_PUBLIC_KEY`: Public key for VM access.
+  *   `SSH_PRIVATE_KEY`: Private key for Ansible access to VM

@@ -1,3 +1,9 @@
+locals {
+  all_vms = merge(
+    module.proxmox_infrastructure.vm_info
+  )
+}
+
 output "ansible_inventory" {
   description = "Inventory data including common credentials and VM list grouped by role"
   sensitive   = true
@@ -5,14 +11,20 @@ output "ansible_inventory" {
     username = var.vm_user
     password = var.vm_password
     vms = {
-      for role in distinct([for vm in proxmox_virtual_environment_vm.vms : split("-", vm.name)[0]]) :
+      for role in distinct([for k, v in local.all_vms : split("-", k)[0]]) :
       role => [
-        for vm in proxmox_virtual_environment_vm.vms :
-        (split("-", vm.name)[0]) == role ? {
-          hostname = vm.name
-          ip       = split("/", var.vms[vm.name].ip)[0]
-        } : null
-        if (split("-", vm.name)[0]) == role
+        for k, v in local.all_vms : {
+          hostname = v.hostname
+          ip       = split("/", v.ip)[0]
+          provider = v.provider
+          disks = [
+            for disk in v.disks : {
+              name = disk.name
+              tier = disk.tier
+            }
+          ]
+        }
+        if split("-", k)[0] == role
       ]
     }
   }

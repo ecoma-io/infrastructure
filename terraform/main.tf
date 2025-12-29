@@ -1,75 +1,80 @@
-resource "proxmox_virtual_environment_vm" "vms" {
-  for_each    = var.vms
-  name        = each.key
-  node_name   = each.value.pve_node
-  vm_id       = each.value.id
-  tags        = [split("-", each.key)[0]] 
-  clone {
-    vm_id = each.value.template
-    full  = true
-  }
-
-  memory {
-    dedicated = each.value.memory
-  }
-
-  cpu {
-    cores   = each.value.cores
-    sockets = 1
-    type    = "host"
-  }
-  scsi_hardware = "virtio-scsi-single"
-  boot_order = ["scsi0"]
-  on_boot = true
-  
-  agent {
-    enabled = true
-    trim    = true 
-  }
-
-  disk {
-    datastore_id = each.value.os_disk.storage
-    interface    = "scsi0"
-    size         = each.value.os_disk.size
-    ssd          = each.value.os_disk.enable_ssd_features ? true : false
-    iothread     = each.value.os_disk.enable_ssd_features ? true : false
-    discard      = each.value.os_disk.enable_ssd_features ? "on" : "ignore"
-  }
-
-  dynamic "disk" {
-    for_each = each.value.data_disks
-    content {
-      datastore_id = disk.value.storage
-      interface    = "scsi${disk.key + 1}"
-      size         = disk.value.size   
-      iothread     = disk.value.enable_ssd_features ? true : false
-      discard      = disk.value.enable_ssd_features ? "on" : "ignore"   
+terraform {
+  required_version = ">= 1.0.0"
+  required_providers {
+    proxmox = {
+      source  = "bpg/proxmox"
+      version = "~> 0.90.0"
+    }
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 6.27.0"
+    }
+    gcp = {
+      source  = "hashicorp/google"
+      version = "~> 7.4.0"
     }
   }
 
-  network_device {
-    model  = "virtio"
-    bridge = "vmbr0"
-  }
-
-  initialization {
-    datastore_id = each.value.os_disk.storage
-    user_account {
-      username = var.vm_user
-      password = var.vm_password
-      keys = [trimspace(var.vm_ssh_key)]
+  cloud {
+    organization = "ecoma-io"
+    workspaces {
+      name = "main"
     }
-    ip_config {
-      ipv4 {
-        address = each.value.ip
-        gateway = each.value.gateway
-      }
-    }
-  }
-
-  lifecycle {
-    ignore_changes = [
-      network_device
-    ]
   }
 }
+
+provider "proxmox" {
+  endpoint  = var.proxmox_api_url
+  api_token = "${var.proxmox_user}=${var.proxmox_password}"
+  insecure  = true
+}
+
+
+module "proxmox_infrastructure" {
+  source = "./modules/proxmox_compute"
+
+  ## Common VM Credentials
+  vm_user     = var.vm_user
+  vm_password = var.vm_password
+  vm_ssh_key  = var.vm_ssh_key
+
+  ## Proxmox VMs Configuration
+  instances = var.proxmox_vms
+
+}
+
+
+# provider "aws" {
+#   region     = var.aws_region
+#   access_key = var.aws_access_key
+#   secret_key = var.aws_secret_key
+# }
+
+
+# module "aws_infrastructure" {
+#   source = "./modules/aws_compute"
+
+#   ## Common VM Credentials
+#   vm_user     = var.vm_user
+#   vm_password = var.vm_password
+#   vm_ssh_key  = var.vm_ssh_key
+
+#   instances = var.aws_vms
+# }
+
+# module "gcp_infrastructure" {
+#   source = "./modules/gcp_compute"
+
+#   ## Common VM Credentials
+#   vm_user     = var.vm_user
+#   vm_password = var.vm_password
+#   vm_ssh_key  = var.vm_ssh_key
+
+#   instances = var.gcp_vms
+# }
+
+# provider "gcp" {
+#   project    = var.gcp_project
+#   region     = var.gcp_region
+#   credentials = var.gcp_secret_key
+# }

@@ -1,4 +1,3 @@
-# --- Common Credentials ---
 variable "vm_user" {
   type      = string
   sensitive = true
@@ -14,23 +13,7 @@ variable "vm_ssh_key" {
   sensitive = true
 }
 
-# --- Proxmox Config ---
-variable "proxmox_api_url" {
-  type      = string
-  sensitive = true
-}
-
-variable "proxmox_user" {
-  type      = string
-  sensitive = true
-}
-
-variable "proxmox_password" {
-  type      = string
-  sensitive = true
-}
-
-variable "proxmox_vms" {
+variable "instances" {
   description = "Map of Proxmox VMs to create"
   type = map(object({
     # VM unique identifier
@@ -60,14 +43,14 @@ variable "proxmox_vms" {
 
   # Validate unique VM IDs
   validation {
-    condition     = length(distinct([for vm in var.proxmox_vms : vm.id])) == length(var.proxmox_vms)
+    condition     = length(distinct([for vm in var.instances : vm.id])) == length(var.instances)
     error_message = "Each VM must have a unique ID."
   }
 
   # Validate minimum requirements for each VM
   validation {
     condition = alltrue([
-      for vm in var.proxmox_vms : (
+      for vm in var.instances : (
         vm.cores >= 1 &&
         vm.memory >= 1024
       )
@@ -78,7 +61,7 @@ variable "proxmox_vms" {
   # Validate that each VM has at least disk 0 defined (as OS disk)
   validation {
     condition = alltrue([
-      for vm_key, vm in var.proxmox_vms : contains(keys(vm.disks), "0")
+      for vm_key, vm in var.instances : contains(keys(vm.disks), "0")
     ])
     error_message = "Every VM instance must have a disk with key '0' defined as the OS disk."
   }
@@ -86,7 +69,7 @@ variable "proxmox_vms" {
   # Validate that each VM has disk 0 defined and its size is at least 10GB
   validation {
     condition = alltrue([
-      for vm_key, vm in var.proxmox_vms : (
+      for vm_key, vm in var.instances : (
         contains(keys(vm.disks), "0") ? vm.disks["0"].size >= 10 : false
       )
     ])
@@ -96,7 +79,7 @@ variable "proxmox_vms" {
   # Validation for disks[*].type
   validation {
     condition = alltrue([
-      for vm_key, vm in var.proxmox_vms : alltrue([
+      for vm_key, vm in var.instances : alltrue([
         for d_idx, d in vm.disks : (
           contains(["swap", "hot", "warm", "cold"], d.tier) &&
           (d_idx == "0" ? d.tier != "swap" : true)
@@ -108,10 +91,11 @@ variable "proxmox_vms" {
   # Validation for disk keys being numeric and within Proxmox SCSI limits
   validation {
     condition = alltrue([
-      for vm in var.proxmox_vms : alltrue([
+      for vm in var.instances : alltrue([
         for idx, d in vm.disks : can(tonumber(idx)) && tonumber(idx) >= 0 && tonumber(idx) <= 30
       ])
     ])
     error_message = "Disk keys must be numbers between 0 and 30 (Proxmox SCSI limits)."
   }
 }
+
