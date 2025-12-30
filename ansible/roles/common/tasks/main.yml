@@ -1,8 +1,6 @@
 - name: Set system timezone to UTC
-  ansible.builtin.command:
-    cmd: timedatectl set-timezone UTC
-  when: (ansible_facts.get('date_time', {}).get('tz') | default(None)) != 'UTC'
-  changed_when: (ansible_facts.get('date_time', {}).get('tz') | default(None)) != 'UTC'
+  community.general.timezone:
+    name: UTC
 
 - name: SSH Hardening configurations
   ansible.builtin.lineinfile:
@@ -16,94 +14,48 @@
     - { regexp: '^MaxAuthTries', line: 'MaxAuthTries 3' }
   notify: Restart SSH
 
-- name: Set single swap disk fact and has flag (first match or null)
-  ansible.builtin.set_fact:
-    common_disk_candidates: "{{ disks | default(hostvars[inventory_hostname].disks | default([])) }}"
+# --- SWAP SETUP ---
 
-- name: Set single swap disk fact and has flag (first match or null)
+- name: Identify swap disk from facts
   ansible.builtin.set_fact:
-    common_swap_disk: "{{ (common_disk_candidates | selectattr('tier', 'equalto', 'swap') | list | first) | default(None) }}"
+    target_swap_disk: "{{ (disks | default([]) | selectattr('tier', 'equalto', 'swap') | list | first) | default(None) }}"
 
-- name: Set has_swap flag using previously defined swap fact
+- name: Map serial to device name
   ansible.builtin.set_fact:
-    common_has_swap_disk: "{{ common_swap_disk is not none }}"
-
-- name: Gather block device name -> serial mapping
-  ansible.builtin.command:
-    cmd: /usr/bin/lsblk -dno NAME,SERIAL
-  register: common_lsblk_out
-  changed_when: false
-  become: true
-  when: common_has_swap_disk
-
-- name: Find device name that matches swap disk serial
-  ansible.builtin.set_fact:
-    common_swap_device: "{{ item.split()[0] }}"
-  when: common_has_swap_disk and (common_swap_disk.name in item)
-  loop: "{{ common_lsblk_out.stdout_lines }}"
+    swap_dev_node: "{{ item.key }}"
+  when: 
+    - target_swap_disk is not none
+    - item.value.serial == target_swap_disk.name # Giả định .name chứa serial
+  loop: "{{ ansible_facts.get('devices', {}) | dict2items }}"
   loop_control:
-    label: "{{ item }}"
+    label: "/dev/{{ item.key }}"
 
-
-- name: Set device path for swap
-  ansible.builtin.set_fact:
-    common_swap_device_path: "/dev/{{ common_swap_device }}"
-  when: common_has_swap_disk and common_swap_device is not none
-
-- name: Check existing filesystem/type on device
-  ansible.builtin.command:
-    cmd: blkid -o value -s TYPE {{ common_swap_device_path }}
-  register: common_blkid_type
-  failed_when: false
-  changed_when: false
-  when: common_has_swap_disk and common_swap_device is not none
-
-- name: Create and enable swap on device (idempotent)
-  when: common_has_swap_disk and common_swap_device is not none and (common_blkid_type.stdout | default('')) != 'swap'
+- name: Configure Swap Device
+  when: swap_dev_node is defined
   block:
-    - name: Attempt to disable swap on device (if present)
-      ansible.builtin.command:
-        cmd: swapon --show=NAME --noheadings | grep -E "^{{ common_swap_device_path }}$" && swapoff {{ common_swap_device_path }} || true
-      become: true
-      failed_when: false
+    - name: Create swap filesystem
+      community.general.filesystem:
+        fstype: swap
+        dev: "/dev/{{ swap_dev_node }}"
+        force: false # Idempotent: không format lại nếu đã là swap
+
+    - name: Get UUID for fstab
+      ansible.builtin.command: "blkid -s UUID -o value /dev/{{ swap_dev_node }}"
+      register: swap_uuid
       changed_when: false
 
-    - name: Make swap on device
-      ansible.builtin.command:
-        cmd: mkswap {{ common_swap_device_path }}
-      become: true
-      changed_when: true
-
-    - name: Enable swap on device now
-      ansible.builtin.command:
-        cmd: swapon {{ common_swap_device_path }}
-      become: true
-      changed_when: true
-
-    - name: Ensure swap device entry in /etc/fstab by UUID
-      block:
-        - name: Get device UUID
-          ansible.builtin.command:
-            cmd: blkid -s UUID -o value {{ common_swap_device_path }}
-          register: common_dev_uuid
-          changed_when: false
-
-        - name: Ensure fstab contains swap entry
-          ansible.builtin.lineinfile:
-            path: /etc/fstab
-            regexp: '^UUID={{ common_dev_uuid.stdout }}\s+\S+\s+swap\b'
-            line: 'UUID={{ common_dev_uuid.stdout }} none swap sw 0 0'
-            create: true
-            mode: '0644'
-          become: true
-          when: common_has_swap_disk and common_swap_device is not none and (blkid_type.stdout | default('')) != 'swap'
-
-- name: Skip swap creation if device already formatted as swap
-  ansible.builtin.debug:
-    msg: "Device {{ common_swap_device_path }} is already swap; nothing to do."
-  when: common_has_swap_disk and common_swap_device is not none and (common_blkid_type.stdout | default('')) == 'swap'
-
-- name: Warn if no matching block device found for swap disk
-  ansible.builtin.debug:
-    msg: "No block device found matching swap disk '{{ common_swap_disk.name }}'"
-  when: common_has_swap_disk and (common_swap_device is not defined or common_swap_device is none)
+    - name: Enable and persist swap
+      ansible.posix.mount:
+        path: none
+        src: "UUID={{ swap_uuid.stdout }}"
+        fstype: swap
+        opts: sw
+        passno: 0
+        dump: 0
+        state: present # 'present' đảm bảo có trong fstab, 'mounted' cho swap đôi khi cần module riêng
+    
+    - name: Activate swap now
+      ansible.builtin.command: "swapon /dev/{{ swap_dev_node }}"
+      register: swapon_res
+      changed_when: "'already' not in swapon_res.stderr"
+      failed_when: false
