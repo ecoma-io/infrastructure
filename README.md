@@ -1,6 +1,6 @@
 # Ecoma's Infrastructure 
 
-This repository is infrastrucure as code (IaC) contains the Terraform and Ansible code to define ecoma infrastructure. And auto deploy with CI/CD
+This repository contains the **Infrastructure as Code (IaC)** for Ecoma. It utilizes **Terraform** and **Ansible** to define, provision, and automatically deploy the infrastructure via CI/CD pipelines.
 
 ## Getting Started
 
@@ -177,3 +177,31 @@ all:
   *   `SSH_PASSWORD`: The password for access to ssh VM
   *   `SSH_PUBLIC_KEY`: Public key for VM access.
   *   `SSH_PRIVATE_KEY`: Private key for Ansible access to VM
+
+
+## Storage Strategy
+
+The storage strategy ensures that data is organized by performance tiers (`swap`, `hot`, `warm`, `cold`).
+
+### 1. Disk Allocation Rules
+- **Minimum Requirement**: Every node has at least **1 OS disk**.
+- **Additional Disks**: Nodes may have additional attached disks for data or swap.
+- **Tiering**: Every disk (including the OS disk) is assigned a specific tier.
+- **Constraint**: A node can have only **one disk per tier**.
+  - *Max Capacity*: Up to 4 disks per node (1 OS + 3 Data/Swap).
+
+### 2. Mounting Structure
+All storage is consolidated under `/var/storage`.
+
+1.  **Directory Creation**:
+    - Based on the OS disk's tier, a corresponding subdirectory is created: `/var/storage/<os-tier>`.
+    - Subdirectories for other attached disks are created: `/var/storage/<disk-tier>`.
+    - *Requirement*: At least one of `hot`, `warm`, or `cold` directories must exist.
+
+2.  **Mount Points**:
+    - The OS disk serves as the root filesystem.
+    - Additional disks are mounted to their respective tier directories:
+      - `/var/storage/hot`
+      - `/var/storage/warm`
+      - `/var/storage/cold`
+    - Swap disks are activated as system swap.
