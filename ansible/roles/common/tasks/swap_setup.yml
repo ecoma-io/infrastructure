@@ -1,0 +1,45 @@
+---
+- name: Identify swap disk from facts
+  ansible.builtin.set_fact:
+    common_target_swap_disk: "{{ (disks | default([]) | selectattr('tier', 'equalto', 'swap') | list | first) | default(None) }}"
+
+- name: Map serial to device name
+  ansible.builtin.set_fact:
+    common_swap_dev_node: "{{ item.key }}"
+  when:
+    - common_target_swap_disk is not none
+    - item.value.serial is defined
+    - item.value.serial == common_target_swap_disk.name
+  loop: "{{ ansible_facts.get('devices', {}) | dict2items }}"
+  loop_control:
+    label: "/dev/{{ item.key }}"
+
+- name: Configure Swap Device
+  when: common_swap_dev_node is defined
+  block:
+    - name: Create swap filesystem
+      community.general.filesystem:
+        fstype: swap
+        dev: "/dev/{{ common_swap_dev_node }}"
+        force: false
+
+    - name: Get UUID for fstab
+      ansible.builtin.command: "blkid -s UUID -o value /dev/{{ common_swap_dev_node }}"
+      register: common_swap_uuid
+      changed_when: false
+
+    - name: Enable and persist swap
+      ansible.posix.mount:
+        path: none
+        src: "UUID={{ common_swap_uuid.stdout }}"
+        fstype: swap
+        opts: sw
+        passno: 0
+        dump: 0
+        state: present
+
+    - name: Activate swap now
+      ansible.builtin.command: "swapon /dev/{{ common_swap_dev_node }}"
+      register: common_swapon_res
+      changed_when: "'already' not in common_swapon_res.stderr"
+      failed_when: false

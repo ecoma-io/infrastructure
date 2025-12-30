@@ -1,0 +1,12 @@
+---
+- name: SSH Hardening configurations
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    validate: 'sshd -t -f %s'
+  loop:
+    - { regexp: '^PermitRootLogin', line: 'PermitRootLogin no' }
+    - { regexp: '^PasswordAuthentication', line: 'PasswordAuthentication no' }
+    - { regexp: '^MaxAuthTries', line: 'MaxAuthTries 3' }
+  notify: Restart SSH

@@ -1,61 +1,25 @@
+---
+# ==========================================
+# Common Role - Main Tasks Entry Point
+# ==========================================
+# This role configures base system settings:
+# - System timezone
+# - SSH security hardening
+# - Swap disk setup
+# - Storage tier structure (/var/storage)
+# ==========================================
+
 - name: Set system timezone to UTC
   community.general.timezone:
     name: UTC
+  tags:
+    - timezone
 
-- name: SSH Hardening configurations
-  ansible.builtin.lineinfile:
-    path: /etc/ssh/sshd_config
-    regexp: "{{ item.regexp }}"
-    line: "{{ item.line }}"
-    validate: 'sshd -t -f %s'
-  loop:
-    - { regexp: '^PermitRootLogin', line: 'PermitRootLogin no' }
-    - { regexp: '^PasswordAuthentication', line: 'PasswordAuthentication no' }
-    - { regexp: '^MaxAuthTries', line: 'MaxAuthTries 3' }
-  notify: Restart SSH
+- name: Apply SSH hardening configurations
+  ansible.builtin.include_tasks: ssh_hardening.yml
 
-# --- SWAP SETUP ---
+- name: Setup swap disk
+  ansible.builtin.include_tasks: swap_setup.yml
 
-- name: Identify swap disk from facts
-  ansible.builtin.set_fact:
-    target_swap_disk: "{{ (disks | default([]) | selectattr('tier', 'equalto', 'swap') | list | first) | default(None) }}"
-
-- name: Map serial to device name
-  ansible.builtin.set_fact:
-    swap_dev_node: "{{ item.key }}"
-  when: 
-    - target_swap_disk is not none
-    - item.value.serial == target_swap_disk.name # Giả định .name chứa serial
-  loop: "{{ ansible_facts.get('devices', {}) | dict2items }}"
-  loop_control:
-    label: "/dev/{{ item.key }}"
-
-- name: Configure Swap Device
-  when: swap_dev_node is defined
-  block:
-    - name: Create swap filesystem
-      community.general.filesystem:
-        fstype: swap
-        dev: "/dev/{{ swap_dev_node }}"
-        force: false # Idempotent: không format lại nếu đã là swap
-
-    - name: Get UUID for fstab
-      ansible.builtin.command: "blkid -s UUID -o value /dev/{{ swap_dev_node }}"
-      register: swap_uuid
-      changed_when: false
-
-    - name: Enable and persist swap
-      ansible.posix.mount:
-        path: none
-        src: "UUID={{ swap_uuid.stdout }}"
-        fstype: swap
-        opts: sw
-        passno: 0
-        dump: 0
-        state: present # 'present' đảm bảo có trong fstab, 'mounted' cho swap đôi khi cần module riêng
-    
-    - name: Activate swap now
-      ansible.builtin.command: "swapon /dev/{{ swap_dev_node }}"
-      register: swapon_res
-      changed_when: "'already' not in swapon_res.stderr"
-      failed_when: false
+- name: Configure storage structure and mount data disks
+  ansible.builtin.include_tasks: storage_setup.yml

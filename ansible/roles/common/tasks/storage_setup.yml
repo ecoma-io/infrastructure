@@ -1,0 +1,38 @@
+---
+- name: Identify OS disk tier
+  ansible.builtin.set_fact:
+    common_os_disk_tier: "{{ (disks | default([]) | selectattr('name', 'equalto', 'os') | map(attribute='tier') | first) | default('warm') }}"
+
+- name: Create base storage directory
+  ansible.builtin.file:
+    path: /var/storage
+    state: directory
+    mode: '0755'
+
+- name: Collect all unique tiers for directory creation
+  ansible.builtin.set_fact:
+    common_all_tiers: "{{ (disks | default([]) | map(attribute='tier') | list | unique | difference(['swap'])) }}"
+
+- name: Create tier subdirectories
+  ansible.builtin.file:
+    path: "/var/storage/{{ item }}"
+    state: directory
+    mode: '0755'
+  loop: "{{ common_all_tiers }}"
+  when: item in ['hot', 'warm', 'cold']
+
+- name: Validate at least one data tier directory exists
+  ansible.builtin.assert:
+    that: common_all_tiers | intersect(['hot', 'warm', 'cold']) | length > 0
+    fail_msg: "No data tier directories (hot/warm/cold) found in disks configuration"
+
+- name: Identify data disks (exclude OS and swap)
+  ansible.builtin.set_fact:
+    common_data_disks: "{{ disks | default([]) | rejectattr('name', 'equalto', 'os') | rejectattr('tier', 'equalto', 'swap') | list }}"
+
+- name: Process each data disk
+  ansible.builtin.include_tasks: mount_data_disk.yml
+  loop: "{{ common_data_disks }}"
+  loop_control:
+    loop_var: data_disk
+  when: common_data_disks | length > 0
