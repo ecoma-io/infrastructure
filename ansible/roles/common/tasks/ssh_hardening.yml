@@ -1,4 +1,3 @@
----
 - name: SSH Hardening configurations
   ansible.builtin.lineinfile:
     path: /etc/ssh/sshd_config
@@ -9,4 +8,6 @@
     - { regexp: "^PermitRootLogin", line: "PermitRootLogin no" }
     - { regexp: "^PasswordAuthentication", line: "PasswordAuthentication no" }
     - { regexp: "^MaxAuthTries", line: "MaxAuthTries 3" }
+    - { regexp: "^ClientAliveInterval", line: "ClientAliveInterval 300" }
+    - { regexp: "^ClientAliveCountMax", line: "ClientAliveCountMax 0" }
   notify: Restart SSH

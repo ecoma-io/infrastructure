@@ -16,6 +16,8 @@ jq -r '
         | "        " + .hostname + ":\n" +
           "          ansible_host: " + .ip + "\n" +
           "          provider: " + .provider + "\n" +
+          "          region: " + .region + "\n" +
+          "          zone: " + .zone + "\n" +
           "          disks:\n" + (
             [
               .disks[] 

@@ -1,25 +1,17 @@
----
 # ==========================================
 # Common Role - Main Tasks Entry Point
 # ==========================================
 # This role configures base system settings:
-# - System timezone
+# - System tuning (timezone, sysctl, journald, kernel modules)
 # - SSH security hardening
-# - Swap disk setup
 # - Storage tier structure (/var/storage)
 # ==========================================
 
-- name: Set system timezone to UTC
-  community.general.timezone:
-    name: UTC
-  tags:
-    - timezone
+- name: Apply system tuning configurations
+  ansible.builtin.include_tasks: system_tuning.yml
 
 - name: Apply SSH hardening configurations
   ansible.builtin.include_tasks: ssh_hardening.yml
 
-- name: Setup swap disk
-  ansible.builtin.include_tasks: swap_setup.yml
-
-- name: Configure storage structure and mount data disks
+- name: Configure storage structure and mount all disks
   ansible.builtin.include_tasks: storage_setup.yml

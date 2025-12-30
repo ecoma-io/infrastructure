@@ -1,0 +1,23 @@
+---
+# TLS Certificates (can be overridden in inventory)
+control_plane_cluster_cert_root: "{{ playbook_dir }}/../cluster-certs"
+
+# K3s Version
+control_plane_k3s_version: "v1.35.0+k3s1"
+
+# Network Configuration
+control_plane_k3s_vip: "10.41.1.254"
+control_plane_k3s_cluster_cidr: "10.42.0.0/16"
+control_plane_k3s_service_cidr: "10.43.0.0/16"
+control_plane_k3s_cluster_dns: "169.254.20.10"
+
+# Kube-vip Configuration
+control_plane_kube_vip_image: "ghcr.io/kube-vip/kube-vip:v1.0.3"
+control_plane_kube_vip_interface: "eth0"
+# BGP settings (defaults; override in inventory for your environment)
+# Your Proxmox eBGP controller runs ASN=65000 — configure kube-vip to use
+# a different local ASN (eBGP requires different ASNs). Defaults below set
+# kube-vip local ASN to 65100 and assume the peer (Proxmox) is 65000.
+control_plane_kube_vip_bgp_as: "65100" # local AS for kube-vip (this node)
+control_plane_kube_vip_bgp_peer_as: "65000" # remote AS used for peers (Proxmox)
+control_plane_kube_vip_bgp_peers: "10.41.10.1:65000::false" # peer entries: addr:AS:pass:multihop

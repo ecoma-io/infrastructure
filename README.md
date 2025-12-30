@@ -1,4 +1,4 @@
-# Ecoma's Infrastructure
+# Ecoma Infrastructure
 
 This repository contains the **Infrastructure as Code (IaC)** for Ecoma. It utilizes **Terraform** and **Ansible** to define, provision, and automatically deploy the infrastructure via CI/CD pipelines.
 
@@ -15,7 +15,38 @@ This repository contains the **Infrastructure as Code (IaC)** for Ecoma. It util
 
 - **Ansible**:
 
-* `ansible/playbook.yaml` Definitation playbook
+* `ansible/playbook.yaml` Definition playbook
+
+## Prerequisites
+
+## Github Action Secrets
+
+**Terraform Cloud**: We are using terraform cloud for storage terraform state
+
+- `TF_API_TOKEN`: Terraform Cloud API Token
+  **Tailscale**: We are using tailscale for networking and for security resean
+- `TS_OAUTH_CLIENT_ID`: Tailscale OAuth Client ID.
+- `TS_OAUTH_SECRET`: Tailscale OAuth Secret.
+  **SSH Info**: Config ssh info for ssh remote to VM (Password for verify sudo only. Need to ssh with SSH Key)
+- `SSH_USERNAME`: The username for access to ssh VM
+- `SSH_PASSWORD`: The password for access to ssh VM
+- `SSH_PUBLIC_KEY`: Public key for VM access.
+- `SSH_PRIVATE_KEY`: Private key for Ansible access to VM
+  **Cluster CA**: Using static cluster CA for idenpodemt ansible run
+- `CLUSTER_CA_SERVER_CA`:
+- `CLUSTER_CA_SERVER_CA_KEY`:
+- `CLUSTER_CA_CLIENT_CA`:
+- `CLUSTER_CA_CLIENT_CA_KEY`:
+- `CLUSTER_CA_REQUEST_HEADER_CA`:
+- `CLUSTER_CA_REQUEST_HEADER_CA_KEY`:
+  **Proxmox Config**: Using promox
+- `PROXMOX_IP`: Proxmox API Tailscale IP.
+- `PROXMOX_API_KEY`: Proxmox API KEY
+- `PROXMOX_API_SECRET`: Proxmox API SECRET
+
+> Can run `generate-cluster-ca.sh` for generate `CLUSTER_CA_*` files
+
+## Proxmox (On Premise Provider)
 
 ## Architecture
 
@@ -86,6 +117,8 @@ The system divides the nodes into 5 roles.
       {
         "hostname": "cdb-1",
         "ip": "192.168.31.102",
+        "region": "us-east",        
+        "zone": "us-east-1",
         "provider": "proxmox",
         "disks": [
           {
@@ -104,6 +137,8 @@ The system divides the nodes into 5 roles.
         "hostname": "cpl-1",
         "ip": "192.168.31.103",
         "provider": "proxmox",
+        "region": "us-east",        
+        "zone": "us-east-1",
         "disks": [
           {
             "name": "os",
@@ -117,6 +152,8 @@ The system divides the nodes into 5 roles.
         "hostname": "wkr-cloud-1",
         "ip": "3.1.2.3",
         "provider": "aws",
+        "region": "us-east",        
+        "zone": "us-east-1",
         "disks": [
           {
             "name": "os",
@@ -138,53 +175,74 @@ The system divides the nodes into 5 roles.
 ```yaml
 all:
   vars:
-    ansible_user: "ssh_user"
-    ansible_become_password: "ssh_password"
+    ansible_user: "***"
+    ansible_become_password: "***"
     ansible_ssh_private_key_file: "/tmp/ssh_key"
     ansible_python_interpreter: "/usr/bin/python3.11"
+    ansible_connect_timeout: 60
+    cluster_cert_root: "/tmp/cluster_certs"
   children:
-    cdb:
+    cpl:
       hosts:
-        cdb-1:
-          ansible_host: 192.168.31.102
+        cpl-1:
+          ansible_host: 192.168.1.111
           provider: proxmox
+          region: us-east
+          zone: us-east-1
+          disks:
+            - name: "os"
+              tier: "hot"
+        cpl-2:
+          ansible_host: 192.168.1.112
+          provider: proxmox
+          region: us-east
+          zone: us-east-2
+          disks:
+            - name: "os"
+              tier: "hot"
+        cpl-3:
+          ansible_host: 192.168.1.113
+          provider: proxmox
+          region: us-east
+          zone: us-east-2
+          disks:
+            - name: "os"
+              tier: "hot"
+    ops:
+      hosts:
+        ops-1:
+          ansible_host: 192.168.1.104
+          provider: proxmox
+          region: us-east
+          zone: us-east-2
           disks:
             - name: "os"
               tier: "warm"
             - name: "data-0"
               tier: "swap"
-    cpl:
+    sts:
       hosts:
-        cpl-1:
-          ansible_host: 192.168.31.103
+        sts-1:
+          ansible_host: 192.168.1.105
           provider: proxmox
-          disks:
-            - name: "os"
-              tier: "warm"
-    wkr:
-      hosts:
-        wkr-cloud-1:
-          ansible_host: 3.1.2.3
-          provider: aws
+          region: us-east
+          zone: us-east-1
           disks:
             - name: "os"
               tier: "hot"
             - name: "data-0"
-              tier: "hot"
+              tier: "cold"
+    wkr:
+      hosts:
+        wkr-1:
+          ansible_host: 192.168.1.106
+          provider: proxmox
+          region: us-east
+          zone: us-east-2
+          disks:
+            - name: "os"
+              tier: "warm"
 ```
-
-## Secrets:
-
-- `TF_API_TOKEN`: Terraform Cloud API Token
-- `PM_IP`: Proxmox API Tailscale IP.
-- `PM_USER`: Proxmox User.
-- `PM_PASSWORD`: Proxmox Token/Password.
-- `TS_OAUTH_CLIENT_ID`: Tailscale OAuth Client ID.
-- `TS_OAUTH_SECRET`: Tailscale OAuth Secret.
-- `SSH_USERNAME`: The username for access to ssh VM
-- `SSH_PASSWORD`: The password for access to ssh VM
-- `SSH_PUBLIC_KEY`: Public key for VM access.
-- `SSH_PRIVATE_KEY`: Private key for Ansible access to VM
 
 ## Storage Strategy
 
@@ -214,3 +272,22 @@ All storage is consolidated under `/var/storage`.
      - `/var/storage/warm`
      - `/var/storage/cold`
    - Swap disks are activated as system swap.
+
+## IP range planning
+
+IP CIDR:
+
+- Tailscale: 100.64.0.0/10
+- Link local: 169.254.0.0/16
+- K3S:
+  - Pods 10.42.0.0/16
+  - Services: 10.43.0.0/16
+- Nodes:
+  - Proxmox SDN: 10.41.1.0/24
+
+Static IP:
+
+- Core DNS: 10.43.0.10
+- Local Node DNS: 169.254.20.10
+- Kube VIP: 10.41.1.254
+- Promix SDN Vnet Gateway: 10.41.1.1

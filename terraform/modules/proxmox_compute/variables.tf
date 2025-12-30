@@ -20,13 +20,19 @@ variable "instances" {
     id = number
     # Proxmox node where VM will be created
     pve_node = string
+    region   = string
+    zone     = string
     # Template VM ID to clone from
     templateId = number
     # VM specifications
-    cores   = number
-    memory  = number
-    ip      = string
-    gateway = string
+    cores  = number
+    memory = number
+
+    network = object({
+      ip      = string
+      gateway = string
+      bridge  = string
+    })
 
     disks = map(
       # Key is disk index (0, 1, 2, ...). Idx 0 is OS disk, others are data disks

@@ -5,7 +5,6 @@
 # - Code formatting (dprint)
 # - Terraform formatting & validation
 # - Ansible linting
-# - Documentation quality (Vale)
 # - Secret scanning (Gitleaks)
 # ==========================================
 
@@ -27,7 +26,7 @@ pre-commit:
     # Terraform formatting check
     terraform-fmt:
       tags: terraform
-      glob: "*.tf"
+      glob: "*.{tf,tfvars}"
       run: terraform fmt -check -diff {staged_files}
       stage_fixed: true
 
@@ -43,22 +42,6 @@ pre-commit:
       glob: "*.{yml,yaml}"
       exclude: "^(?!ansible/)"
       run: ansible-lint {staged_files}
-
-    # Documentation linting with Vale
-    vale-lint:
-      tags: docs
-      glob: "*.md"
-      run: vale --config=.vale.ini {staged_files} || true
-
-    # Check for trailing whitespace
-    trailing-whitespace:
-      tags: formatting
-      glob: "*.{tf,yml,yaml,md}"
-      run: |
-        if grep -n '[[:space:]]$' {staged_files}; then
-          echo "Error: Trailing whitespace found"
-          exit 1
-        fi
 
 # Pre-push hooks - run before pushing to remote
 pre-push:

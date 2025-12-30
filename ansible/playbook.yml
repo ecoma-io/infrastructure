@@ -4,14 +4,10 @@
   roles:
     - common
 
-# - name: Configure Database Servers
-#   hosts: cdb
-#   become: true
-#   roles:
-#     - control-plane-database
-
-# - name: Configure Control Plane Servers
-#   hosts: cpl
-#   become: true
-#   roles:
-#     - control-plane
+- name: Configure Control Plane Servers
+  hosts: cpl
+  become: true
+  vars:
+    k3s_version: "v1.31.0+k3s1"
+  roles:
+    - control_plane

@@ -13,10 +13,11 @@ resource "proxmox_virtual_environment_vm" "this" {
   name      = each.key
   node_name = each.value.pve_node
   vm_id     = each.value.id
-  tags      = [split("-", each.key)[0]]
 
   clone {
-    vm_id = each.value.templateId
+    vm_id        = each.value.templateId
+    datastore_id = each.value.disks["0"].storage
+    full         = true
   }
 
   memory {
@@ -57,7 +58,8 @@ resource "proxmox_virtual_environment_vm" "this" {
 
   network_device {
     model  = "virtio"
-    bridge = "vmbr0"
+    bridge = each.value.network.bridge
+    mtu    = 1230
   }
 
   initialization {
@@ -69,8 +71,8 @@ resource "proxmox_virtual_environment_vm" "this" {
     }
     ip_config {
       ipv4 {
-        address = each.value.ip
-        gateway = each.value.gateway
+        address = each.value.network.ip
+        gateway = each.value.network.gateway
       }
     }
   }

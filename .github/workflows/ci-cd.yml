@@ -1,0 +1,159 @@
+name: CI/CD Pipeline
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  integration-checks:
+    name: Static Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install dprint
+        run: |
+          curl -fsSL https://dprint.dev/install.sh | sh
+          echo "$HOME/.dprint/bin" >> $GITHUB_PATH
+
+      - name: Install Ansible Lint
+        run: |
+          pip install ansible-core ansible-lint
+          if [ -f ansible/requirements.yml ]; then
+            ansible-galaxy collection install -r ansible/requirements.yml || true
+          fi
+
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v3
+        with:
+          tflint_version: latest
+
+      - name: Install Checkov (Security Scanner)
+        run: pip install checkov
+
+      - name: Code Formatting Check (dprint)
+        run: dprint check
+
+      - name: Terraform Format Check
+        working-directory: ./terraform
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Init (for validation)
+        working-directory: ./terraform
+        run: terraform init -backend=false
+
+      - name: Terraform Validate
+        working-directory: ./terraform
+        run: terraform validate
+
+      - name: TFLint
+        working-directory: ./terraform
+        run: |
+          tflint --init
+          tflint --recursive
+
+      - name: Ansible Lint
+        run: ansible-lint ansible/
+
+      - name: Security Scan (Checkov)
+        run: |
+          checkov --directory terraform/ --framework terraform --quiet --compact
+          checkov --directory ansible/ --framework ansible --quiet --compact
+
+  deploy:
+    name: Deploy Infrastructure
+    # needs: integration-checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v4
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci-provisioner
+          ping: ${{ secrets.PM_IP }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Terraform Init
+        working-directory: ./terraform
+        run: terraform init
+        env:
+          TF_VAR_proxmox_api_url: https://${{ secrets.PM_IP }}:8006/
+          TF_VAR_proxmox_user: ${{ secrets.PM_USER }}
+          TF_VAR_proxmox_password: ${{ secrets.PM_PASSWORD }}
+
+      - name: Terraform Apply
+        working-directory: ./terraform
+        run: terraform apply -auto-approve
+        env:
+          TF_VAR_proxmox_api_url: https://${{ secrets.PROXMOX_IP }}:8006/
+          TF_VAR_proxmox_api_key: ${{ secrets.PROXMOX_API_KEY }}
+          TF_VAR_proxmox_api_secret: ${{ secrets.PROXMOX_API_SECRET }}
+          TF_VAR_vm_user: ${{ secrets.SSH_USERNAME }}
+          TF_VAR_vm_password: ${{ secrets.SSH_PASSWORD }}
+          TF_VAR_vm_ssh_key: ${{ secrets.SSH_PUBLIC_KEY }}
+
+      - name: Generate Ansible Inventory
+        shell: bash
+        run: |
+          cd terraform
+          terraform output -json ansible_inventory | grep '^{' > ../tf_output.json
+          cd ..
+          SSH_USER=$(jq -r '.username' tf_output.json)
+          SSH_PASS=$(jq -r '.password' tf_output.json)
+          cat <<EOF > ansible/inventory.yml
+          all:
+            vars:
+              ansible_user: "$SSH_USER"
+              ansible_become_password: "$SSH_PASS"
+              ansible_ssh_private_key_file: "/tmp/ssh_key"
+              ansible_python_interpreter: "/usr/bin/python3.11"
+              ansible_connect_timeout: 60
+              control_plane_cluster_cert_root: "/tmp/cluster_certs"
+            children:
+          EOF
+
+          # Generate inventory from Terraform output
+          bash .github/scripts/generate-inventory.sh tf_output.json ansible/inventory.yml
+
+          cat ansible/inventory.yml
+
+      - name: Run Ansible Playbook
+        shell: bash
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "False"
+        run: |
+          pip install ansible-core
+          if [ -f ansible/requirements.yml ]; then
+            ansible-galaxy collection install -r ansible/requirements.yml || true
+          fi
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > /tmp/ssh_key
+          chmod 600 /tmp/ssh_key
+
+          mkdir /tmp/cluster_certs
+          echo "${{ secrets.CLUSTER_CA_SERVER_CA }}" > /tmp/cluster_certs/server-ca.crt
+          echo "${{ secrets.CLUSTER_CA_SERVER_CA_KEY }}" > /tmp/cluster_certs/server-ca.key
+          echo "${{ secrets.CLUSTER_CA_CLIENT_CA }}" > /tmp/cluster_certs/client-ca.crt
+          echo "${{ secrets.CLUSTER_CA_CLIENT_CA_KEY }}" > /tmp/cluster_certs/client-ca.key
+          echo "${{ secrets.CLUSTER_CA_REQUEST_HEADER_CA }}" > /tmp/cluster_certs/request-header-ca.crt
+          echo "${{ secrets.CLUSTER_CA_REQUEST_HEADER_CA_KEY }}" > /tmp/cluster_certs/request-header-ca.key
+
+          ansible-playbook -i ansible/inventory.yml ansible/playbook.yml

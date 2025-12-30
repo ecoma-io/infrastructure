@@ -15,8 +15,10 @@ output "ansible_inventory" {
       role => [
         for k, v in local.all_vms : {
           hostname = v.hostname
-          ip       = split("/", v.ip)[0]
+          ip       = v.ip
           provider = v.provider
+          zone     = v.zone
+          region   = v.region
           disks = [
             for disk in v.disks : {
               name = disk.name
