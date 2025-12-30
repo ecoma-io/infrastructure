@@ -2,6 +2,7 @@
 # Lefthook Configuration for IaC Repository
 # ==========================================
 # Git hooks automation for:
+# - Code formatting (dprint)
 # - Terraform formatting & validation
 # - Ansible linting
 # - Documentation quality (Vale)
@@ -11,11 +12,22 @@
 # Minimum lefthook version required
 min_version: 2.0.0
 
+# Global environment variables
+env:
+  PATH: $HOME/.dprint/bin:$PATH
+
 # Pre-commit hooks - run before commit is created
 pre-commit:
   parallel: true
 
   commands:
+    # Code formatting with dprint
+    dprint-fmt:
+      tags: formatting
+      glob: "*.{json,md,yaml,yml,toml}"
+      run: dprint fmt {staged_files}
+      stage_fixed: true
+
     # Terraform formatting check
     terraform-fmt:
       tags: terraform
@@ -61,6 +73,11 @@ pre-push:
     gitleaks-scan:
       tags: security
       run: gitleaks detect --source . --verbose --no-git
+
+    # Check all files are formatted with dprint
+    dprint-check:
+      tags: formatting
+      run: dprint check
 
     # Final Ansible lint check
     ansible-lint-full:

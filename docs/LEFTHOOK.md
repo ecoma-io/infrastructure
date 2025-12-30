@@ -13,6 +13,7 @@ lefthook install
 ## Available Hooks
 
 ### Pre-Commit
+
 Runs before each commit is created:
 
 - **terraform-fmt**: Checks Terraform formatting
@@ -22,6 +23,7 @@ Runs before each commit is created:
 - **trailing-whitespace**: Detects trailing spaces
 
 ### Pre-Push
+
 Runs before pushing to remote:
 
 - **gitleaks-scan**: Scans for hardcoded secrets/credentials
@@ -29,11 +31,13 @@ Runs before pushing to remote:
 - **terraform-fmt-all**: Checks all Terraform files formatting
 
 ### Commit-Msg
+
 Validates commit message format:
 
 - **commit-message-lint**: Enforces [Conventional Commits](https://www.conventionalcommits.org/) format
 
 #### Valid commit message formats:
+
 ```
 feat(terraform): add AWS compute module
 fix(ansible): correct swap disk mounting logic
@@ -43,6 +47,7 @@ ci(github): add automated testing workflow
 ```
 
 #### Commit types:
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation changes
@@ -55,12 +60,14 @@ ci(github): add automated testing workflow
 - `build`: Build system changes
 
 ### Post-Checkout
+
 Runs after switching branches:
 
 - Reminders to run `terraform init`
 - Reminders to update Ansible collections
 
 ### Post-Merge
+
 Runs after successful merge:
 
 - Alerts about infrastructure file changes
@@ -86,12 +93,14 @@ LEFTHOOK=0 git commit -m "emergency fix"
 ## Skipping Hooks
 
 ### Skip specific commands:
+
 ```bash
 git commit --no-verify  # Skip all pre-commit hooks
 LEFTHOOK_EXCLUDE=terraform-fmt git commit -m "skip terraform check"
 ```
 
 ### Skip by tags:
+
 ```bash
 LEFTHOOK_EXCLUDE=terraform,ansible git commit -m "skip terraform and ansible"
 ```
@@ -114,6 +123,7 @@ pre-commit:
 ```
 
 Then reinstall:
+
 ```bash
 lefthook install
 ```
@@ -121,22 +131,26 @@ lefthook install
 ## Troubleshooting
 
 ### Hook failed but I need to commit:
+
 ```bash
 # Skip verification (emergency only!)
 git commit --no-verify -m "your message"
 ```
 
 ### Update hooks after config change:
+
 ```bash
 lefthook install
 ```
 
 ### Check hook status:
+
 ```bash
 ls -la .git/hooks/
 ```
 
 ### Uninstall hooks:
+
 ```bash
 lefthook uninstall
 ```

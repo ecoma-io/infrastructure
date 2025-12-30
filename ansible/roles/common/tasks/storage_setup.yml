@@ -7,7 +7,7 @@
   ansible.builtin.file:
     path: /var/storage
     state: directory
-    mode: '0755'
+    mode: "0755"
 
 - name: Collect all unique tiers for directory creation
   ansible.builtin.set_fact:
@@ -17,7 +17,7 @@
   ansible.builtin.file:
     path: "/var/storage/{{ item }}"
     state: directory
-    mode: '0755'
+    mode: "0755"
   loop: "{{ common_all_tiers }}"
   when: item in ['hot', 'warm', 'cold']
 

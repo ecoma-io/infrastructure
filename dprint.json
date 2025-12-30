@@ -1,0 +1,44 @@
+{
+  "$schema": "https://dprint.dev/schemas/v0.json",
+  "projectType": "openSource",
+  "incremental": true,
+  "extends": [],
+  "plugins": [
+    "https://plugins.dprint.dev/json-0.19.4.wasm",
+    "https://plugins.dprint.dev/markdown-0.17.8.wasm",
+    "https://plugins.dprint.dev/toml-0.6.3.wasm",
+    "https://plugins.dprint.dev/dockerfile-0.3.2.wasm",
+    "https://plugins.dprint.dev/g-plane/pretty_yaml-v0.5.0.wasm"
+  ],
+  "includes": [
+    "**/*.{json,md,yaml,yml,toml,Dockerfile}"
+  ],
+  "excludes": [
+    "**/node_modules",
+    "**/*-lock.json",
+    "**/package-lock.json",
+    "**/yarn.lock",
+    "**/.terraform",
+    "**/.ansible",
+    "**/.git",
+    "**/.vale"
+  ],
+  "json": {
+    "indentWidth": 2,
+    "lineWidth": 120,
+    "useTabs": false,
+    "trailingCommas": "never"
+  },
+  "markdown": {
+    "lineWidth": 120,
+    "textWrap": "maintain"
+  },
+  "yaml": {
+    "indentWidth": 2,
+    "quotes": "preferDouble",
+    "trailingComma": false
+  },
+  "toml": {
+    "indentWidth": 2
+  }
+}

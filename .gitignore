@@ -1,3 +1,5 @@
 .terraform
 .terraform.lock.hcl
 .ansible
+# Vale styles cache
+.vale/styles/*
