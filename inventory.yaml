@@ -1,0 +1,67 @@
+all:
+  vars:
+    ansible_user: "***"
+    ansible_become_password: "***"
+    ansible_ssh_private_key_file: "/tmp/ssh_key"
+    ansible_python_interpreter: "/usr/bin/python3.11"
+  children:
+    cdb:
+      hosts:
+        cdb-1:
+          ansible_host: 192.168.1.102
+          provider: proxmox
+          disks:
+            - name: "os"
+              tier: "warm"
+            - name: "data-0"
+              tier: "swap"
+            - name: "data-1"
+              tier: "hot"
+        cdb-2:
+          ansible_host: 192.168.1.112
+          provider: proxmox
+          disks:
+            - name: "os"
+              tier: "warm"
+            - name: "data-0"
+              tier: "swap"
+            - name: "data-1"
+              tier: "hot"
+    cpl:
+      hosts:
+        cpl-1:
+          ansible_host: 192.168.1.103
+          provider: proxmox
+          disks:
+            - name: "os"
+              tier: "warm"
+            - name: "data-0"
+              tier: "swap"
+    ops:
+      hosts:
+        ops-1:
+          ansible_host: 192.168.1.104
+          provider: proxmox
+          disks:
+            - name: "os"
+              tier: "warm"
+            - name: "data-0"
+              tier: "swap"
+    sts:
+      hosts:
+        sts-1:
+          ansible_host: 192.168.1.105
+          provider: proxmox
+          disks:
+            - name: "os"
+              tier: "hot"
+            - name: "data-0"
+              tier: "cold"
+    wkr:
+      hosts:
+        wkr-1:
+          ansible_host: 192.168.1.106
+          provider: proxmox
+          disks:
+            - name: "os"
+              tier: "warm"

@@ -5,7 +5,10 @@
     "ghcr.io/devcontainers/features/git:1": {},
     "ghcr.io/devcontainers/features/terraform:1": {},
     "ghcr.io/devcontainers-extra/features/ansible:2": {},
-    "ghcr.io/hspaans/devcontainer-features/ansible-lint:2": {}
+    "ghcr.io/hspaans/devcontainer-features/ansible-lint:2": {},
+    "ghcr.io/devcontainers-extra/features/lefthook-asdf:1": {},
+    "ghcr.io/shinepukur/devcontainer-features/vale:1": {},
+    "ghcr.io/frntn/devcontainers-features/gitleaks:1": {}
   },
   "customizations": {
     "vscode": {

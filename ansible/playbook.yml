@@ -1,2 +1,17 @@
-- hosts: all
+- name: Apply common configuration
+  hosts: all
   become: true
+  roles:
+    - common
+
+# - name: Configure Database Servers
+#   hosts: cdb
+#   become: true
+#   roles:
+#     - control-plane-database
+
+# - name: Configure Control Plane Servers
+#   hosts: cpl
+#   become: true
+#   roles:
+#     - control-plane
