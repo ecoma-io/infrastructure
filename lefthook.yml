@@ -1,0 +1,127 @@
+# ==========================================
+# Lefthook Configuration for IaC Repository
+# ==========================================
+# Git hooks automation for:
+# - Terraform formatting & validation
+# - Ansible linting
+# - Documentation quality (Vale)
+# - Secret scanning (Gitleaks)
+# ==========================================
+
+# Minimum lefthook version required
+min_version: 2.0.0
+
+# Pre-commit hooks - run before commit is created
+pre-commit:
+  parallel: true
+
+  commands:
+    # Terraform formatting check
+    terraform-fmt:
+      tags: terraform
+      glob: "*.tf"
+      run: terraform fmt -check -diff {staged_files}
+      stage_fixed: true
+
+    # Terraform validation
+    terraform-validate:
+      tags: terraform
+      root: "terraform/"
+      run: terraform init -backend=false && terraform validate
+
+    # Ansible linting
+    ansible-lint:
+      tags: ansible
+      glob: "*.{yml,yaml}"
+      exclude: "^(?!ansible/)"
+      run: ansible-lint {staged_files}
+
+    # Documentation linting with Vale
+    vale-lint:
+      tags: docs
+      glob: "*.md"
+      run: vale --config=.vale.ini {staged_files} || true
+
+    # Check for trailing whitespace
+    trailing-whitespace:
+      tags: formatting
+      glob: "*.{tf,yml,yaml,md}"
+      run: |
+        if grep -n '[[:space:]]$' {staged_files}; then
+          echo "Error: Trailing whitespace found"
+          exit 1
+        fi
+
+# Pre-push hooks - run before pushing to remote
+pre-push:
+  parallel: false
+
+  commands:
+    # Scan for secrets before pushing
+    gitleaks-scan:
+      tags: security
+      run: gitleaks detect --source . --verbose --no-git
+
+    # Final Ansible lint check
+    ansible-lint-full:
+      tags: ansible
+      run: ansible-lint ansible/
+
+    # Terraform format check (all files)
+    terraform-fmt-all:
+      tags: terraform
+      run: terraform fmt -check -recursive terraform/
+
+# Commit-msg hooks - validate commit message format
+commit-msg:
+  commands:
+    # Enforce conventional commits format
+    commit-message-lint:
+      tags: git
+      run: |
+        commit_msg=$(cat {1})
+        if ! echo "$commit_msg" | grep -qE "^(feat|fix|docs|style|refactor|test|chore|ci|perf|build)(\(.+\))?: .+"; then
+          echo "Error: Commit message must follow Conventional Commits format"
+          echo "Example: feat(terraform): add new compute module"
+          echo ""
+          echo "Types: feat, fix, docs, style, refactor, test, chore, ci, perf, build"
+          exit 1
+        fi
+
+# Post-checkout hooks - run after switching branches
+post-checkout:
+  commands:
+    # Remind to run terraform init if switching branches
+    terraform-init-reminder:
+      tags: terraform
+      run: |
+        echo "📦 Don't forget to run: cd terraform && terraform init"
+
+    # Update Ansible collections if needed
+    ansible-collections-reminder:
+      tags: ansible
+      run: |
+        echo "📦 Ensure Ansible collections are up to date: ansible-galaxy collection install -r requirements.yml"
+
+# Post-merge hooks - run after successful merge
+post-merge:
+  commands:
+    # Alert about potential infrastructure changes
+    infrastructure-change-alert:
+      tags: notification
+      run: |
+        if git diff --name-only ORIG_HEAD HEAD | grep -qE "^terraform/.*\.tf$|^ansible/"; then
+          echo "⚠️  Infrastructure files changed - review carefully before applying"
+        fi
+
+# Skip patterns for all hooks
+skip_output:
+  - meta
+  - summary
+
+# Output configuration
+output:
+  - execution
+  - success
+
+colors: true
