@@ -1,0 +1,14 @@
+- name: Apply common configuration
+  hosts: all
+  become: true
+  roles:
+    - common
+
+- name: Configure Control Plane Servers
+  hosts: cpl
+  become: true
+  serial: 1
+  vars:
+    k3s_version: "v1.31.0+k3s1"
+  roles:
+    - control_plane

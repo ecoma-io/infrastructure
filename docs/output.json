@@ -1,0 +1,59 @@
+{
+  "username": "ssh_user",
+  "password": "ssh_password",
+  "vms": {
+    "cdb": [
+      {
+        "hostname": "cdb-1",
+        "ip": "192.168.31.102",
+        "region": "us-east",
+        "zone": "us-east-1",
+        "provider": "proxmox",
+        "disks": [
+          {
+            "name": "os",
+            "tier": "warm"
+          },
+          {
+            "name": "data-0",
+            "tier": "swap"
+          }
+        ]
+      }
+    ],
+    "cpl": [
+      {
+        "hostname": "cpl-1",
+        "ip": "192.168.31.103",
+        "provider": "proxmox",
+        "region": "us-east",
+        "zone": "us-east-1",
+        "disks": [
+          {
+            "name": "os",
+            "tier": "warm"
+          }
+        ]
+      }
+    ],
+    "wkr": [
+      {
+        "hostname": "wkr-cloud-1",
+        "ip": "3.1.2.3",
+        "provider": "aws",
+        "region": "us-east",
+        "zone": "us-east-1",
+        "disks": [
+          {
+            "name": "os",
+            "tier": "hot"
+          },
+          {
+            "name": "data-0",
+            "tier": "hot"
+          }
+        ]
+      }
+    ]
+  }
+}

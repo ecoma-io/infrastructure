@@ -2,247 +2,72 @@
 
 This repository contains the **Infrastructure as Code (IaC)** for Ecoma. It utilizes **Terraform** and **Ansible** to define, provision, and automatically deploy the infrastructure via CI/CD pipelines.
 
-## Getting Started
+## Requirement
 
-- **Terraform**:
-
-* `terraform/main.tf`: Root module orchestrating sub-modules for different providers.
-* `terraform/modules/`: Contains provider-specific logic (proxmox_compute, aws_compute, gcp_compute, oci_compute).
-* `terraform/providers.tf`: Provider configuration (Proxmox, AWS, GCP, OCI).
-* `terraform/variables.tf`: Declarations of input variables and default values used by the module.
-* `terraform/terraform.tfvars`: Centralized configuration for all VMs across all providers.
-* `terraform/outputs.tf`: Aggregated outputs exported by Terraform (includes `ansible_inventory` JSON used to generate Ansible inventory).
-
-- **Ansible**:
-
-* `ansible/playbook.yaml` Definition playbook
-
-## Prerequisites
-
-## Github Action Secrets
-
-**Terraform Cloud**: We are using terraform cloud for storage terraform state
-
-- `TF_API_TOKEN`: Terraform Cloud API Token
-  **Tailscale**: We are using tailscale for networking and for security resean
-- `TS_OAUTH_CLIENT_ID`: Tailscale OAuth Client ID.
-- `TS_OAUTH_SECRET`: Tailscale OAuth Secret.
-  **SSH Info**: Config ssh info for ssh remote to VM (Password for verify sudo only. Need to ssh with SSH Key)
-- `SSH_USERNAME`: The username for access to ssh VM
-- `SSH_PASSWORD`: The password for access to ssh VM
-- `SSH_PUBLIC_KEY`: Public key for VM access.
-- `SSH_PRIVATE_KEY`: Private key for Ansible access to VM
-  **Cluster CA**: Using static cluster CA for idenpodemt ansible run
-- `CLUSTER_CA_SERVER_CA`:
-- `CLUSTER_CA_SERVER_CA_KEY`:
-- `CLUSTER_CA_CLIENT_CA`:
-- `CLUSTER_CA_CLIENT_CA_KEY`:
-- `CLUSTER_CA_REQUEST_HEADER_CA`:
-- `CLUSTER_CA_REQUEST_HEADER_CA_KEY`:
-  **Proxmox Config**: Using promox
-- `PROXMOX_IP`: Proxmox API Tailscale IP.
-- `PROXMOX_API_KEY`: Proxmox API KEY
-- `PROXMOX_API_SECRET`: Proxmox API SECRET
-
-> Can run `generate-cluster-ca.sh` for generate `CLUSTER_CA_*` files
-
-## Proxmox (On Premise Provider)
+Prommox already install on the server.
+Debian 12 generic cloud image template vm with id 9000
 
 ## Architecture
 
+### Design principles
+
+- On‑premise baseline: the on‑prem Proxmox environment hosts the core, persistent, and stateful services to minimize steady‑state cost and keep critical data under direct control.
+- Cloud bursting: cloud providers are used as ephemeral capacity for stateless workloads during spikes; cloud nodes are not the baseline and should be treated as disposable.
+- Provider‑agnostic, modular Terraform: declare core infrastructure and connectivity once, reuse modules for different providers, and keep autoscaling decisions outside low‑level modules.
+
 ### Roles
 
-The system divides the nodes into 5 roles.
+The system divides nodes into five roles:
 
-1. Control Plane Database (cdb)
+1. Control Plane (cpl)
 
-- Run PostgreSQL as the K3s datastore instead of etcd.
-- Prioritize IOPS (NVMe) to reduce API server latency.
-- Low CPU variability, but require stable RAM for query caching.
-- PostgreSQL installed directly on the host OS.
+- Runs k3s server components (API, scheduler) and must remain highly available.
+- No user workloads to preserve API uptime.
 
-2. Control Plane (cpl)
+2. Operator (ops)
 
-- Run k3s server, manage scheduling, API, and core components.
-- Do not run user workloads to ensure API uptime.
+- Management and monitoring components (ArgoCD, Prometheus/Grafana, logging).
 
-3. Operator (ops)
+3. Statefulset (sts)
 
-- Management and monitoring brain (ArgoCD, Grafana/Prometheus stack).
-- Node balancing IO, CPU, and RAM.
+- Runs system stateful applications (MongoDB, RabbitMQ, SeaweedFS, etc.).
+- Prefer vertical scaling and strong data locality on‑prem.
 
-4. Statefulset (sts)
+4. Worker (wkr)
 
-- Run system stateful services: MongoDB, RabbitMQ, SeaweedFS, KurentDB.
-- Primarily scale vertically rather than horizontally.
+- Stateless application workloads, horizontally scalable, suitable for cloud bursting.
 
-5. Worker (application workloads)
+### Terraform scope
 
-- Run business-logic microservices (stateless).
-- Typically scaled horizontally (scale-out).
-- Flexible resources, often CPU-intensive.
-- Do not hold critical data and can be restarted at any time.
+- Terraform modules in this repo declare core components and persistent connectivity only: Proxmox resources, cloud worker templates, VPC/Subnet definitions, and the Tailscale agents/pods used for overlay connectivity.
+- Terraform produces canonical outputs (for example `ansible_inventory`) that downstream processes consume.
+- Autoscaling decisions (when to add/remove cloud workers) are made by higher‑level automation (metrics-driven autoscalers, CI/CD workflows, or operator runbooks), which invoke Terraform modules as needed.
 
-### Hybrid Cloud Infrastructure
+### Cloud bursting workflow (overview)
 
-- On-premise costs are typically lower than cloud, so on-premise resources handle steady-state workloads to reduce expenses.
-- When compute demand spikes (e.g., promotional periods or large campaigns), the system can automatically expand to the cloud to handle the load without investing in additional on-site hardware (cloud bursting) until demand stabilizes and further on-premise investment is justified.
-- Redundancy: the cloud environment serves as a standby for disaster recovery or maintenance, reducing downtime and ensuring stable operations.
-- **Multi-Cloud Support**: The infrastructure is designed to be provider-agnostic, supporting Proxmox (On-Prem), AWS, GCP, and OCI seamlessly via modular Terraform architecture.
+- Trigger: defined metric thresholds (CPU, queue length, latency) or a manual CI trigger.
+- Provision: CI or autoscaler runs Terraform to provision cloud worker modules for the selected provider; newly provisioned nodes join the Tailscale overlay and appear in the inventory.
+- Configure: Ansible is executed to configure OS, storage mounts, and join the cluster.
+- Teardown: automated teardown policies and cost controls destroy cloud resources when load recedes; resources must be tagged and monitored for cost tracking.
 
-### Comunication/Security
+### Networking & security
 
-- Nodes located on different infrastructures (cloud/on-premise) will communicate with each other via tailscale with subnet router configured.
-- Administrators and CI/CD teams will be required to have permissions and join the Tailscale network in order to access and control the cluster via web-ui/ssh.
-- All SSH access will use a separate account to ensure auditability and only SSH keys (not passwords) can be used to prevent brute-force attacks.
+- All nodes (on‑prem and cloud) join a Tailscale overlay with subnet routing to provide a secure, consistent network fabric across providers.
+- Proxmox SDN and cloud VPCs are logically connected through Tailscale; services rely on the overlay for control plane and management traffic.
+- Admin and CI/CD access is via Tailscale and SSH keys; secrets are stored in GitHub Secrets or a vault and follow least‑privilege principles.
 
-## CI/CD
+### Operational notes
 
-1. Push to `main` branch.
-2. GitHub Actions will:
-   - Connect to Tailscale.
-   - Run Terraform to provision VMs across configured providers.
-   - Terraform will generate outputs (See example of output bellow)
-   - Generate Ansible inventory (See example of inventory bellow)
-   - Run Ansible to configure OS, Storage, and K3s.
+- Keep stateful services on‑prem; use cloud only for stateless scale‑out workloads.
+- Implement monitoring and alerting for burst events and teardown failures.
+- Enforce cost controls, tagging, and automatic rotation/revocation of credentials used by CI to provision cloud resources.
+- Regularly test the bursting path in staging to ensure the full provisioning → configuration → teardown cycle works reliably.
 
-## Example of outputs
+### Logical diagram
 
-```
-{
-  "username": "ssh_user",
-  "password": "ssh_password",
-  "vms": {
-    "cdb": [
-      {
-        "hostname": "cdb-1",
-        "ip": "192.168.31.102",
-        "region": "us-east",        
-        "zone": "us-east-1",
-        "provider": "proxmox",
-        "disks": [
-          {
-            "name": "os",
-            "tier": "warm"
-          },
-          {
-            "name": "data-0",
-            "tier": "swap"
-          }
-        ]
-      }
-    ],
-    "cpl": [
-      {
-        "hostname": "cpl-1",
-        "ip": "192.168.31.103",
-        "provider": "proxmox",
-        "region": "us-east",        
-        "zone": "us-east-1",
-        "disks": [
-          {
-            "name": "os",
-            "tier": "warm"
-          }
-        ]
-      }
-    ],
-    "wkr": [
-      {
-        "hostname": "wkr-cloud-1",
-        "ip": "3.1.2.3",
-        "provider": "aws",
-        "region": "us-east",        
-        "zone": "us-east-1",
-        "disks": [
-          {
-            "name": "os",
-            "tier": "hot"
-          },
-          {
-            "name": "data-0",
-            "tier": "hot"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
+- On‑prem core (Proxmox) → Tailscale overlay ↔ Cloud workers (ephemeral)
 
-## Example of inventory
-
-```yaml
-all:
-  vars:
-    ansible_user: "***"
-    ansible_become_password: "***"
-    ansible_ssh_private_key_file: "/tmp/ssh_key"
-    ansible_python_interpreter: "/usr/bin/python3.11"
-    ansible_connect_timeout: 60
-    cluster_cert_root: "/tmp/cluster_certs"
-  children:
-    cpl:
-      hosts:
-        cpl-1:
-          ansible_host: 192.168.1.111
-          provider: proxmox
-          region: us-east
-          zone: us-east-1
-          disks:
-            - name: "os"
-              tier: "hot"
-        cpl-2:
-          ansible_host: 192.168.1.112
-          provider: proxmox
-          region: us-east
-          zone: us-east-2
-          disks:
-            - name: "os"
-              tier: "hot"
-        cpl-3:
-          ansible_host: 192.168.1.113
-          provider: proxmox
-          region: us-east
-          zone: us-east-2
-          disks:
-            - name: "os"
-              tier: "hot"
-    ops:
-      hosts:
-        ops-1:
-          ansible_host: 192.168.1.104
-          provider: proxmox
-          region: us-east
-          zone: us-east-2
-          disks:
-            - name: "os"
-              tier: "warm"
-            - name: "data-0"
-              tier: "swap"
-    sts:
-      hosts:
-        sts-1:
-          ansible_host: 192.168.1.105
-          provider: proxmox
-          region: us-east
-          zone: us-east-1
-          disks:
-            - name: "os"
-              tier: "hot"
-            - name: "data-0"
-              tier: "cold"
-    wkr:
-      hosts:
-        wkr-1:
-          ansible_host: 192.168.1.106
-          provider: proxmox
-          region: us-east
-          zone: us-east-2
-          disks:
-            - name: "os"
-              tier: "warm"
-```
+This README documents the intended architecture and operational workflows; specific automation (metric thresholds, autoscaler types, and Terraform module names) should be recorded in deployment runbooks and CI workflow definitions.
 
 ## Storage Strategy
 
@@ -291,3 +116,22 @@ Static IP:
 - Local Node DNS: 169.254.20.10
 - Kube VIP: 10.41.1.254
 - Promix SDN Vnet Gateway: 10.41.1.1
+
+## Lables
+
+`topology.ecoma.io/provider`: The cloud/on-primise provider
+
+## Getting Started
+
+- **Terraform**:
+
+* `terraform/main.tf`: Root module orchestrating sub-modules for different providers.
+* `terraform/modules/`: Contains provider-specific logic (proxmox_compute, aws_compute, gcp_compute, oci_compute).
+* `terraform/providers.tf`: Provider configuration (Proxmox, AWS, GCP, OCI).
+* `terraform/variables.tf`: Declarations of input variables and default values used by the module.
+* `terraform/terraform.tfvars`: Centralized configuration for all VMs across all providers.
+* `terraform/outputs.tf`: Aggregated outputs exported by Terraform (includes `ansible_inventory` JSON used to generate Ansible inventory).
+
+- **Ansible**:
+
+* `ansible/playbook.yaml` Definition playbook

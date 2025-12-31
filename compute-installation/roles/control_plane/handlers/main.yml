@@ -1,0 +1,16 @@
+- name: Restart K3s
+  ansible.builtin.systemd:
+    name: k3s
+    state: restarted
+    daemon_reload: true
+  when: control_plane_k3s_version_check.rc == 0 or control_plane_join_result is success
+
+- name: Wait for kube-vip to be ready
+  ansible.builtin.command:
+    cmd: k3s kubectl wait --for=condition=Ready pod/kube-vip -n kube-system --timeout=60s
+  register: control_plane_kube_vip_wait
+  until: control_plane_kube_vip_wait.rc == 0
+  retries: 5
+  delay: 10
+  ignore_errors: true
+  changed_when: false

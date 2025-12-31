@@ -1,0 +1,69 @@
+all:
+  vars:
+    ansible_user: "***"
+    ansible_become_password: "***"
+    ansible_ssh_private_key_file: "/tmp/ssh_key"
+    ansible_python_interpreter: "/usr/bin/python3.11"
+    ansible_connect_timeout: 60
+    cluster_cert_root: "/tmp/cluster_certs"
+  children:
+    cpl:
+      hosts:
+        cpl-1:
+          ansible_host: 192.168.1.111
+          provider: proxmox
+          region: us-east
+          zone: us-east-1
+          disks:
+            - name: "os"
+              tier: "hot"
+        cpl-2:
+          ansible_host: 192.168.1.112
+          provider: proxmox
+          region: us-east
+          zone: us-east-2
+          disks:
+            - name: "os"
+              tier: "hot"
+        cpl-3:
+          ansible_host: 192.168.1.113
+          provider: proxmox
+          region: us-east
+          zone: us-east-2
+          disks:
+            - name: "os"
+              tier: "hot"
+    ops:
+      hosts:
+        ops-1:
+          ansible_host: 192.168.1.104
+          provider: proxmox
+          region: us-east
+          zone: us-east-2
+          disks:
+            - name: "os"
+              tier: "warm"
+            - name: "data-0"
+              tier: "swap"
+    sts:
+      hosts:
+        sts-1:
+          ansible_host: 192.168.1.105
+          provider: proxmox
+          region: us-east
+          zone: us-east-1
+          disks:
+            - name: "os"
+              tier: "hot"
+            - name: "data-0"
+              tier: "cold"
+    wkr:
+      hosts:
+        wkr-1:
+          ansible_host: 192.168.1.106
+          provider: proxmox
+          region: us-east
+          zone: us-east-2
+          disks:
+            - name: "os"
+              tier: "warm"

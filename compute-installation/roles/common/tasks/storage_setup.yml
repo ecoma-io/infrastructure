@@ -1,0 +1,116 @@
+- name: Create base storage directory
+  ansible.builtin.file:
+    path: /var/storage
+    state: directory
+    mode: "0755"
+
+- name: Identify OS disk tier and create subdirectory
+  ansible.builtin.set_fact:
+    common_os_disk_tier: "{{ (disks | default([]) | selectattr('name', 'equalto', 'os') | map(attribute='tier') | first) | default('warm') }}"
+
+- name: Create os disk tier storage subdirectory
+  ansible.builtin.file:
+    path: "/var/storage/{{ common_os_disk_tier }}"
+    state: directory
+    mode: "0755"
+
+- name: Identify all non-OS disks (data and swap)
+  ansible.builtin.set_fact:
+    common_non_os_disks: "{{ (disks | default([]) | rejectattr('name', 'equalto', 'os') | list) }}"
+
+- name: Get block device information with serials
+  ansible.builtin.command: lsblk -d -o NAME,SIZE,MODEL,SERIAL -J
+  register: common_lsblk_output
+  changed_when: false
+
+- name: Parse lsblk output
+  ansible.builtin.set_fact:
+    common_block_devices: "{{ (common_lsblk_output.stdout | from_json).blockdevices }}"
+
+- name: Initialize disk devices list
+  ansible.builtin.set_fact:
+    common_disk_devices: []
+
+- name: Map disk serials to device nodes using lsblk data
+  ansible.builtin.set_fact:
+    common_disk_devices: "{{ common_disk_devices + [{'name': item.0.name, 'tier': item.0.tier, 'device': item.1.name}] }}"
+  when:
+    - item.1.serial is defined
+    - item.1.serial != ""
+    - (item.1.serial == item.0.name) or (item.1.serial | lower == item.0.name | lower)
+  loop: "{{ common_non_os_disks | product(common_block_devices) | list }}"
+  loop_control:
+    label: "{{ item.0.name }} ({{ item.0.tier }}) -> /dev/{{ item.1.name }} [serial: {{ item.1.serial | default('none') }}]"
+
+- name: Create tier directories
+  ansible.builtin.file:
+    path: "/var/storage/{{ item.tier }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ common_disk_devices | default([]) | rejectattr('tier', 'equalto', 'swap') }}"
+  loop_control:
+    label: "/var/storage/{{ item.tier }}"
+
+- name: Create filesystems
+  community.general.filesystem:
+    fstype: "{{ 'swap' if item.tier == 'swap' else 'xfs' }}"
+    dev: "/dev/{{ item.device }}"
+    force: false
+  loop: "{{ common_disk_devices | default([]) }}"
+  loop_control:
+    label: "/dev/{{ item.device }} ({{ item.tier }})"
+
+- name: Get UUIDs for all disks
+  ansible.builtin.command: "blkid -s UUID -o value /dev/{{ item.device }}"
+  register: common_disk_uuids
+  changed_when: false
+  loop: "{{ common_disk_devices | default([]) }}"
+  loop_control:
+    label: "/dev/{{ item.device }}"
+
+- name: Mount data disks to storage tiers
+  ansible.posix.mount:
+    path: "/var/storage/{{ item.item.tier }}"
+    src: "UUID={{ item.stdout }}"
+    fstype: xfs
+    opts: defaults
+    passno: 2
+    dump: 0
+    state: mounted
+  loop: "{{ common_disk_uuids.results | default([]) }}"
+  when: item.item.tier != 'swap'
+  loop_control:
+    label: "/var/storage/{{ item.item.tier }}"
+
+- name: Grow XFS filesystems if disk expanded
+  ansible.builtin.command: "xfs_growfs /var/storage/{{ item.item.tier }}"
+  register: common_xfs_grow
+  changed_when: "'data blocks changed' in common_xfs_grow.stdout"
+  loop: "{{ common_disk_uuids.results | default([]) }}"
+  when: item.item.tier != 'swap'
+  loop_control:
+    label: "/var/storage/{{ item.item.tier }}"
+
+- name: Enable and persist swap in fstab
+  ansible.posix.mount:
+    path: none
+    src: "UUID={{ item.stdout }}"
+    fstype: swap
+    opts: sw
+    passno: 0
+    dump: 0
+    state: present
+  loop: "{{ common_disk_uuids.results | default([]) }}"
+  when: item.item.tier == 'swap'
+  loop_control:
+    label: "swap (UUID={{ item.stdout }})"
+
+- name: Activate swap now
+  ansible.builtin.command: "swapon /dev/{{ item.item.device }}"
+  register: common_swapon_res
+  changed_when: "'already' not in common_swapon_res.stderr"
+  failed_when: false
+  loop: "{{ common_disk_uuids.results | default([]) }}"
+  when: item.item.tier == 'swap'
+  loop_control:
+    label: "/dev/{{ item.item.device }}"

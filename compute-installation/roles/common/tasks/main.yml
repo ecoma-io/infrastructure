@@ -1,0 +1,35 @@
+# ==========================================
+# Common Role - Main Tasks Entry Point
+# ==========================================
+# This role configures base system settings:
+# - System tuning (timezone, ssh security, sysctl, journald, kernel modules)
+# - Storage tier structure (/var/storage)
+# ==========================================
+
+- name: Wait for cloud-init to finish
+  ansible.builtin.command: cloud-init status --wait
+  changed_when: false
+
+- name: Install logrotate if missing
+  ansible.builtin.apt:
+    name: logrotate
+    state: present
+    update_cache: true
+
+- name: Install e2fsprogs if missing (provides mkfs.ext4)
+  ansible.builtin.apt:
+    name: e2fsprogs
+    state: present
+    update_cache: true
+
+- name: Install xfsprogs if missing (provides mkfs.xfs)
+  ansible.builtin.apt:
+    name: xfsprogs
+    state: present
+    update_cache: true
+
+- name: Apply system tuning configurations
+  ansible.builtin.include_tasks: system_tuning.yml
+
+- name: Configure storage structure and mount all disks
+  ansible.builtin.include_tasks: storage_setup.yml

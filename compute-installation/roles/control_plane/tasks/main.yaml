@@ -1,0 +1,134 @@
+---
+- name: Get current K3s version
+  ansible.builtin.command: k3s --version
+  register: control_plane_k3s_version_check
+  failed_when: false
+  changed_when: false
+
+- name: Prepare K3s directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+    owner: root
+  loop:
+    - /etc/rancher/k3s
+    - /var/lib/rancher/k3s/agent/pod-manifests
+    - /var/lib/rancher/k3s/server/tls
+    - /var/lib/rancher/k3s/server/manifests
+
+- name: Setup TLS Certificates files
+  ansible.builtin.copy:
+    src: "{{ control_plane_cluster_cert_root }}/{{ item }}"
+    dest: "/var/lib/rancher/k3s/server/tls/{{ item }}"
+    mode: "0600"
+    owner: root
+  loop:
+    - server-ca.crt
+    - server-ca.key
+    - client-ca.crt
+    - client-ca.key
+    - request-header-ca.crt
+    - request-header-ca.key
+  notify: Restart K3s
+
+- name: Setup K3s config
+  ansible.builtin.template:
+    src: k3s-config.yaml.j2
+    dest: /etc/rancher/k3s/config.yaml
+    mode: "0644"
+  notify: Restart K3s
+
+- name: Setup static pods
+  ansible.builtin.template:
+    src: "{{ item }}.yaml.j2"
+    dest: "/var/lib/rancher/k3s/agent/pod-manifests/{{ item }}.yaml"
+    mode: "0644"
+  loop:
+    - kube-vip
+
+- name: Setup add-on manifests
+  ansible.builtin.template:
+    src: "{{ item }}.yaml.j2"
+    dest: "/var/lib/rancher/k3s/server/manifests/{{ item }}.yaml"
+    mode: "0644"
+    owner: root
+  loop:
+    - monitor
+    - flannel
+    - coredns
+    - metrics-server
+    - dns-cache
+
+# --- UPDATE STRATEGY ---
+- name: Update K3s Binary (if version changed)
+  ansible.builtin.get_url:
+    url: "https://github.com/k3s-io/k3s/releases/download/{{ control_plane_k3s_version }}/k3s"
+    dest: /usr/local/bin/k3s
+    mode: "0755"
+    owner: root
+  when:
+    - control_plane_k3s_version_check.rc == 0
+    - control_plane_k3s_version not in control_plane_k3s_version_check.stdout
+  notify: Restart K3s
+
+# --- BOOTSTRAP STRATEGY ---
+- name: K3s Bootstrap Block
+  when: control_plane_k3s_version_check.rc != 0
+  block:
+    - name: Download K3s install script
+      ansible.builtin.get_url:
+        url: https://get.k3s.io
+        dest: /tmp/k3s_install.sh
+        mode: "0700"
+
+    - name: Init First Control Plane Node
+      when: inventory_hostname == groups['cpl'][0]
+      ansible.builtin.command:
+        cmd: /tmp/k3s_install.sh server --cluster-init --write-kubeconfig-mode 644
+      environment:
+        INSTALL_K3S_VERSION: "{{ control_plane_k3s_version }}"
+        INSTALL_K3S_SKIP_ENABLE: "true"
+      changed_when: true
+
+    - name: Start K3s on First Node
+      when: inventory_hostname == groups['cpl'][0]
+      ansible.builtin.systemd:
+        name: k3s
+        state: started
+        enabled: true
+        daemon_reload: true
+
+    - name: Wait for Node Token
+      ansible.builtin.wait_for:
+        path: /var/lib/rancher/k3s/server/node-token
+      when: inventory_hostname == groups['cpl'][0]
+
+    - name: Fetch Node Token
+      ansible.builtin.slurp:
+        src: /var/lib/rancher/k3s/server/node-token
+      register: control_plane_node_token
+      delegate_to: "{{ groups['cpl'][0] }}"
+      run_once: true
+
+    - name: Join Secondary Control Plane Nodes
+      when: inventory_hostname != groups['cpl'][0]
+      ansible.builtin.command:
+        cmd: /tmp/k3s_install.sh server --server https://{{ control_plane_k3s_vip }}:6443
+      register: control_plane_join_result
+      until: control_plane_join_result.rc == 0
+      retries: 5
+      delay: 10
+      environment:
+        INSTALL_K3S_VERSION: "{{ control_plane_k3s_version }}"
+        K3S_TOKEN: "{{ control_plane_node_token.content | b64decode | trim }}"
+        INSTALL_K3S_SKIP_ENABLE: "true"
+      no_log: true
+      changed_when: true
+
+- name: Ensure K3s Service is running
+  ansible.builtin.systemd:
+    name: k3s.service
+    state: started
+    enabled: true
+    daemon_reload: true
